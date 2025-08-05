@@ -1,40 +1,25 @@
-button,
-a {
+button, a {
     cursor: pointer;
     background-color: var(--none);
 }
 
 body {
     background-color: var(--black);
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-#root {
+// 각 컴포넌트 가장 바깥 div에 해당 클래스를 넣으면 자동으로 크기가 설정됩니다.
+.container {
     width: 100%;
-}
-
-.container_w {
-    padding-top: 112px;
-    min-width: 1000px;
-    min-height: 1080px;
-}
-
-.container_m {
-    padding-top: 47px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    width: 393px !important;
-    min-height: calc(100vh - 222px);
     margin: 0 auto;
-    background-color: var(--black);
+    background-color: #161616;
+    min-width: 393px;
+    max-width: 420px;
+    height: 100vh;
+    min-height: 852px;
+    position: relative;
 }
 
-::-webkit-scrollbar {
-    display: none;
-}
-
+// 해당 클래스를 붙이면 display가 무조건 none이 됩니다.
 .none {
     display: none !important;
 }

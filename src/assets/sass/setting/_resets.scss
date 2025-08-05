@@ -1,3 +1,7 @@
+// 시스템 전역에 사용하는 css 초기화입니다.
+// 딱히 건드리실 내용은 없습니다!!!
+
+// border-box 초기화
 *,
 *:before,
 *:after {
@@ -37,6 +41,8 @@ figcaption {
     padding: 0;
 }
 
+// 폰트 초기화 
+/* input 제거, 폰트에서 문자를 지원하지 않아서 password가 안보임 */
 input,
 body,
 button,
@@ -46,6 +52,7 @@ textarea {
     font-family: var(--mainfont);
 }
 
+// 링크 초기화
 a,
 a:hover,
 a:focus {
@@ -53,6 +60,7 @@ a:focus {
     text-decoration: none;
 }
 
+// 스타일 초기화
 h1,
 h2,
 h3,
@@ -63,25 +71,23 @@ h6 {
 }
 
 h1 {
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 26px;
 }
 
 h2 {
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 22px;
 }
 
 h3 {
-    font-size: 12px;
+    font-size: 18px;
 }
 
 h4 {
-    font-size: 10px;
+    font-size: 16px;
 }
 
 h5 {
-    font-size: 8px;
+    font-size: 14px;
 }
 
 ul {
@@ -115,7 +121,38 @@ select {
     border: 0;
 }
 
+// 스킵메뉴
+#skip a {
+    position: absolute;
+    left: 10px;
+    top: -92px;
+    z-index: 100000;
+    font-size: 1rem;
+    padding: 10px 30px;
+    color: var(--white);
+    background: var(--black);
+}
+
+#skip a:focus,
+#skip a:active {
+    top: 10px;
+}
+
+// 글씨 숨기기
+.blind {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 // IR(Image Replacement)
+// 의미가 포함되어 있는 image를 배경으로 표현하고, 텍스트는 보이지 않게 설정하는 방법입니다.
 .ir {
     display: block;
     overflow: hidden;
