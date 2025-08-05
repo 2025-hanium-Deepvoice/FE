@@ -1,0 +1,106 @@
+.VoiceInfo_wrap {
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -5px;
+
+    .back {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 23px;
+      cursor: pointer;
+      margin-left: -170px;
+    }
+  }
+}
+
+.voice-analysis-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 20px 32px;
+
+  h3 {
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+    margin: 0 0 3px 0;
+  }
+
+  .chat-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .chat-bubble {
+      background-color: #2c2c2c;
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: white;
+      font-size: 15px;
+      display: flex;
+      flex-direction: column;
+
+      .chat-text {
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .chat-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 7px;
+      }
+    }
+  }
+
+  .analysis-box,
+  .tips-box {
+    background-color: #2c2c2c;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 11px;
+    font-size: 15px;
+    color: white;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    p {
+      margin-bottom: 6px;
+      padding-top: 2px;
+    }
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px;
+
+    button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .report-btn,
+    .save-btn {
+      background-color: #2c2c2c;
+      color: #ff4d4d;
+    }
+  }
+}

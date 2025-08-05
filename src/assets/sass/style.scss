@@ -7,3 +7,6 @@
 
 @use 'login/login';
 @use 'login/signup';
+@use 'detail/VoiceRecord';
+@use 'detail/VoiceInfo';
+@use 'detail/VoiceAlert';

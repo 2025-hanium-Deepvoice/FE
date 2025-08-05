@@ -81,3 +81,49 @@
   }
 }
 
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup {
+  background-color: white;
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  width: 80%;
+  max-width: 320px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  color: #000;
+
+  .confetti {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 15px;
+    margin: 4px 0;
+  }
+
+  .popup-btn {
+    margin-top: 20px;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    background-color: #a99cf5;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+  }
+}

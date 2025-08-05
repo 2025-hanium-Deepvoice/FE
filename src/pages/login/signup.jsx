@@ -7,16 +7,21 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPopup, setShowPopup] = useState(false); 
 
   const handleSignup = () => {
-    if (isFormValid) {
+    if (name && id && password) {
       console.log({ name, id, password });
+      setShowPopup(true); 
     }
   };
 
   const handleBack = () => {
     navigate('/login');
-    //로그인 처리
+  };
+
+  const handleGoToLogin = () => {
+    navigate('/login');
   };
 
   const isFormValid = name.trim() !== '' && id.trim() !== '' && password.trim() !== '';
@@ -72,6 +77,20 @@ const Signup = () => {
       >
         회원가입
       </button>
+
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <div className="confetti">🎉</div>
+            <p>너의 목소리가 보여</p>
+            <p>서비스 가입을 축하드립니다</p>
+            <p>아래 버튼을 눌러 서비스를 이용해주세요</p>
+            <button className="popup-btn" onClick={handleGoToLogin}>
+              로그인하기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
