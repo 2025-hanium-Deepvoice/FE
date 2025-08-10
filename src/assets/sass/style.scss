@@ -4,9 +4,12 @@
 @use "setting/vars";
 @use "setting/resets";
 @use "setting/common";
+@import 'setting/voice-upload';
+@import 'setting/home';
 
 @use 'login/login';
 @use 'login/signup';
 @use 'detail/VoiceRecord';
 @use 'detail/VoiceInfo';
 @use 'detail/VoiceAlert';
+
