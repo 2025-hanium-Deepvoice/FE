@@ -17,6 +17,11 @@ body {
     height: 100vh;
     min-height: 852px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    min-height: 100vh; 
 }
 
 // 해당 클래스를 붙이면 display가 무조건 none이 됩니다.
