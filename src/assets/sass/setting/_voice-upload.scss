@@ -1,0 +1,245 @@
+.voice-upload {
+  min-height: 100vh;
+  background-color: #161616;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .description {
+    font-size: 0.875rem;
+    color: #aaaaaa;
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-box {
+    width: 90%;
+    max-width: 420px;
+    background-color: #3b3b3b;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 2rem; // 카드 간 간격
+
+    .input-group {
+      margin-top: 0.75rem;
+      margin-bottom: 1rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.6rem 0.875rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-size: 1rem;
+        color: #000;
+
+        &::placeholder {
+          color: #b0b0b0;
+        }
+      }
+    }
+
+    /* 프로필 이미지 */
+    .profile-image {
+      position: relative;
+      display: flex;
+      justify-content: center;
+
+      .image-hit-area {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        overflow: hidden;
+        cursor: pointer;
+        background: #5a5a5a;
+
+        input {
+          display: none;
+        }
+
+        .placeholder {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          svg { color: #fff; }
+        }
+
+        .preview-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .edit-badge {
+          position: absolute;
+          right: -2px;
+          bottom: -2px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 9999px;
+          background: #9f7aea;
+          color: #fff;
+          border: 2px solid #3b3b3b;
+        }
+      }
+
+      .image-clear {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 22px;
+        height: 22px;
+        border-radius: 9999px;
+        border: none;
+        background: #ff6666;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+    }
+
+    /* 녹음 영역 */
+    .record-section {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.75rem;
+      align-items: center;
+
+      .record-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #eee;
+      }
+
+      .record-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        grid-column: 1 / -1; // 아래 줄로 내려서 오디오와 버튼이 겹치지 않게
+        flex-wrap: wrap;
+      }
+
+      .record-btn {
+        padding: 0.55rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        color: #ffffff;
+        background-color: #6f2c91; // 기본: 녹음 시작
+        flex: 0 0 auto;
+      }
+      .record-btn.recorded {
+        background-color: #4caf50; // 녹음 완료 후: 재녹음하기
+      }
+
+      .audio-preview {
+        flex: 1 1 220px;
+        width: 100%;
+        height: 36px;
+        outline: none;
+        background: #2e2e2e;
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .add-button {
+    margin-top: 0.5rem;
+    background-color: #6f2c91;
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    box-shadow: 0 4px 10px rgba(161, 139, 255, 0.5);
+    cursor: pointer;
+  }
+
+  /* 팝업 */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .popup {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    max-width: 360px;
+    width: calc(100% - 32px);
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .popup-mic {
+    color: #9f7aea;
+    margin-bottom: 1rem;
+  }
+
+  .popup-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #111;
+  }
+
+  .popup-script {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .popup-button {
+    background-color: #9f7aea;
+    color: white;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
