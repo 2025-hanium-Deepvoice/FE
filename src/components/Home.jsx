@@ -58,7 +58,7 @@ const Home = ({
   };
 
   return (
-    <div className="container home">
+    <div className="container2 home">
       {/* 인사 */}
       <header className="home__greeting">
         <div className="home__avatar"><span role="img" aria-label="avatar">🧑‍💻</span></div>
