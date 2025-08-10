@@ -4,8 +4,8 @@
 @use "setting/vars";
 @use "setting/resets";
 @use "setting/common";
-@import 'setting/voice-upload';
-@import 'setting/home';
+@use 'setting/voice-upload';
+@use 'setting/home';
 
 @use 'login/login';
 @use 'login/signup';

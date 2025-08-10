@@ -82,7 +82,7 @@ const VoiceUpload = () => {
   };
 
   return (
-    <div className="voice-wrap container">
+    <div className="voice-wrap container2">
       <div className="voice-upload">
         <h2>프로필 등록</h2>
         <p className="description">가까운 사람들의 프로필을 등록합니다.</p>
