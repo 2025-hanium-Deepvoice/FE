@@ -7,6 +7,7 @@ import Signup from './pages/login/signup.jsx'
 import VoiceRecord from './pages/detail/VoiceRecord.jsx'
 import VoiceInfo from './pages/detail/VoiceRecordInfo.jsx'
 import VoiceAlert from "./pages/detail/VoiceAlert.jsx"
+import Select from "./pages/select/select.jsx";
 
 const App = () => {
     return (
@@ -16,6 +17,7 @@ const App = () => {
                 <Route path="/Home" element={<Home heroLogoSrc="/MainlogoWhite.png" />} /> {/* 만약 로고 바꿀거면 여기서 */}
                 <Route path='/Home' element={<Home />} />
                 <Route path='/' />
+                <Route path='/select' element={<Select />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/signup' element={<Signup />} />
                 <Route path='/voice-record' element={<VoiceRecord />} />
