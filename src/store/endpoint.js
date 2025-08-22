@@ -1,25 +1,94 @@
 // src/store/endpoint.js
-import { http } from "./client";
+import { http, authHeader } from "./client";
 
+/**
+ * 간단한 쿼리스트링 헬퍼
+ * 예: qs({ skip: 0, take: 10 }) -> "?skip=0&take=10"
+ */
+function qs(params = {}) {
+  const s = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    s.set(k, String(v));
+  });
+  const q = s.toString();
+  return q ? `?${q}` : "";
+}
+
+/**
+ * 내 정보 조회
+ * GET /users/me
+ */
 export function apiGetMe() {
   return http(`/users/me`, { method: "GET" });
 }
 
+/**
+ * 음성기록 목록 조회
+ * GET /analyses?skip&take
+ *
+ * Response:
+ * {
+ *   items: [{ id, file_name, file_path, duration_seconds, is_phishing, confidence, detected_at }],
+ *   meta: { total, skip, take }
+ * }
+ */
 export function apiGetAnalyses({ skip = 0, take = 20 } = {}) {
-  const qs = new URLSearchParams({ skip: String(skip), take: String(take) });
-  return http(`/analyses?${qs.toString()}`, { method: "GET" });
+  const query = qs({ skip, take });
+  return http(`/analyses${query}`, {
+    method: "GET",
+    headers: { ...authHeader() },
+  });
 }
 
+/**
+ * 음성기록 상세(Transcript) 조회
+ * GET /transcripts/:id
+ *
+ * Response (예시):
+ * { transcript, type, guidance, ... }
+ */
+export function apiGetTranscript(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n) || n < 0) {
+    throw new Error(`apiGetTranscript: invalid id "${id}"`);
+  }
+  return http(`/transcripts/${n}`, {
+    method: "GET",
+    headers: { ...authHeader() },
+  });
+}
+
+/**
+ * 화자 프로필 생성
+ * POST /profiles
+ * multipart/form-data (FormData 자동 Content-Type)
+ */
 export async function apiCreateProfile({ name, relation, voice }) {
-  const allowed = ["audio/mpeg","audio/mp4","audio/wav","audio/webm","audio/x-wav"];
-  if (!voice || !allowed.includes(voice.type)) throw new Error(`허용되지 않은 파일 타입: ${voice?.type || "unknown"}`);
-  if (voice.size > 50 * 1024 * 1024) throw new Error(`파일 용량 50MB 초과`);
+  const ALLOWED_MIME = new Set([
+    "audio/mpeg",   // mp3
+    "audio/mp4",    // m4a
+    "audio/wav",
+    "audio/webm",
+    "audio/x-wav",
+  ]);
+  const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+
+  if (!voice || !ALLOWED_MIME.has(voice.type)) {
+    throw new Error(`허용되지 않은 파일 타입: ${voice?.type || "unknown"}`);
+  }
+  if (voice.size > MAX_SIZE) {
+    throw new Error(`파일 용량 50MB 초과`);
+  }
 
   const form = new FormData();
   form.append("name", name);
   form.append("relation", relation);
   form.append("voice", voice);
 
-  // Content-Type은 FormData가 자동 설정
-  return http(`/profiles`, { method: "POST", body: form });
+  return http(`/profiles`, {
+    method: "POST",
+    body: form,
+    headers: { ...authHeader() }, // 토큰만 추가
+  });
 }

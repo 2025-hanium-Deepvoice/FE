@@ -1,45 +1,119 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Play, ChevronRight, Mic, X } from "lucide-react";
 import "../assets/sass/setting/_home.scss";
+import { apiGetMe, apiGetAnalyses } from "../store/endpoint";
 
 const Home = ({
-  userName = "000",
   heroLogoSrc = "",
-  records = [
-    { id: 1, name: "엄마의 통화 기록", date: "2025.08.23", duration: "3:15", avatar: "", phishingRisk: 88 },
-    { id: 2, name: "아빠의 통화 기록", date: "2025.08.23", duration: "1:15", avatar: "" },
-    { id: 3, name: "이모의 통화 기록", date: "2025.08.23", duration: "3:20", avatar: "" },
-  ],
-  /**
-   * onUpload(file, { signal })가 Promise를 리턴한다고 가정.
-   * 서버 업로드 로직을 여기로 넘겨주면 모달은 자동으로 관리됨.
-   */
   onUpload,
 }) => {
   const fileRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
-  const abortRef = useRef(null); // 업로드 취소용
+  const abortRef = useRef(null);
+
+  // 상단 인사말
+  const [meName, setMeName] = useState("000");
+  const [meLoading, setMeLoading] = useState(false);
+
+  // 기록 리스트
+  const [records, setRecords] = useState([]);
+  const [listLoading, setListLoading] = useState(false);
+
+  // utils
+  const fmtDate = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}.${m}.${day}`;
+  };
+  const fmtDuration = (sec) => {
+    if (!Number.isFinite(sec)) return "";
+    const m = Math.floor(sec / 60);
+    const s = String(Math.floor(sec % 60)).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  // /users/me
+  useEffect(() => {
+    let mounted = true;
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token") ||
+      "";
+    if (!token) return;
+
+    (async () => {
+      setMeLoading(true);
+      try {
+        const me = await apiGetMe();
+        if (mounted && me?.name) setMeName(me.name);
+      } catch (e) {
+        console.error("GET /users/me failed:", e);
+      } finally {
+        mounted && setMeLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // /analyses
+  useEffect(() => {
+    let mounted = true;
+    const token =
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token") ||
+      "";
+    if (!token) return;
+
+    (async () => {
+      setListLoading(true);
+      try {
+        const data = await apiGetAnalyses({ skip: 0, take: 10 });
+        const list = (data?.items || []).map((it) => ({
+          id: it.id,
+          name: it.file_name,
+          date: fmtDate(it.detected_at),
+          duration: fmtDuration(it.duration_seconds),
+          avatar: "",
+          phishingRisk: it.is_phishing ? it.confidence : undefined,
+        }));
+        if (mounted) setRecords(list);
+      } catch (e) {
+        console.error("GET /analyses failed:", e);
+      } finally {
+        mounted && setListLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handlePick = () => fileRef.current?.click();
 
   const handleChange = async (e) => {
     const file = e.target.files?.[0];
-    e.target.value = ""; // 같은 파일 재선택 가능
+    e.target.value = "";
     if (!file) return;
 
-    // 업로드 시작
     setIsUploading(true);
-
-    // 취소 지원(선택): fetch 업로드 등에 넘길 AbortSignal
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
       if (onUpload) {
         await onUpload(file, { signal: controller.signal });
+        // 업로드 뒤 목록 새로고침 원하면 여기서 /analyses 다시 호출
+        // const data = await apiGetAnalyses({ skip: 0, take: 10 });
+        // setRecords( ...map );
       } else {
-        // 데모용: 2초 대기 후 완료
-        await new Promise((r) => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 1500));
       }
     } catch (err) {
       if (err?.name !== "AbortError") {
@@ -62,7 +136,9 @@ const Home = ({
       {/* 인사 */}
       <header className="home__greeting">
         <div className="home__avatar"><span role="img" aria-label="avatar">🧑‍💻</span></div>
-        <p className="home__hello"><strong>{userName}</strong>님 안녕하세요!</p>
+        <p className="home__hello">
+          <strong>{meLoading ? "로딩중" : meName}</strong>님 안녕하세요!
+        </p>
       </header>
 
       {/* 히어로(로고 자리) */}
@@ -73,7 +149,7 @@ const Home = ({
           <div className="home__hero-blank" aria-hidden="true" />
         )}
 
-        {/* 업로드 카드: 아이콘+텍스트 위 / 버튼 아래 */}
+        {/* 업로드 카드 */}
         <div className="home__upload-card">
           <div className="card__left">
             <div className="card__icon"><Mic size={22} /></div>
@@ -97,12 +173,14 @@ const Home = ({
       {/* 리스트 헤더 */}
       <div className="home__list-head">
         <h3>음성기록</h3>
-        <button className="see-all">전체 보기 <ChevronRight size={16} /></button>
+        <button className="see-all" disabled={listLoading}>
+          전체 보기 <ChevronRight size={16} />
+        </button>
       </div>
 
       {/* 기록 리스트 */}
       <ul className="home__list">
-        {records.map((r) => {
+        {(records.length ? records : []).map((r) => {
           const risky = Number.isFinite(r.phishingRisk);
           return (
             <li key={r.id} className={`record ${risky ? "record--danger" : ""}`}>
@@ -129,6 +207,12 @@ const Home = ({
             </li>
           );
         })}
+
+        {listLoading && (
+          <li className="record">
+            <div className="record__texts">불러오는 중…</div>
+          </li>
+        )}
       </ul>
 
       {/* 업로드 중 모달 */}

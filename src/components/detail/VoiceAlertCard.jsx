@@ -1,6 +1,7 @@
 import { FaExclamationCircle } from "react-icons/fa";
 
-const VoiceAlertCard = () => {
+// props로 점수/날짜/길이 받도록 변경
+const VoiceAlertCard = ({ score, detectedAt, durationLabel }) => {
   return (
     <div className="voice-alert-card">
       <div className="icon-circle">
@@ -8,8 +9,10 @@ const VoiceAlertCard = () => {
       </div>
       <div className="alert-info">
         <div className="alert-title">보이스피싱 의심됨</div>
-        <div className="alert-sub">합성 음성+텍스트분석 73%</div>
-        <div className="alert-date">2025.08.23  3분 15초</div>
+        <div className="alert-sub">합성 음성+텍스트분석 {score ?? "–"}%</div>
+        <div className="alert-date">
+          {detectedAt} {durationLabel ? `  ${durationLabel}` : ""}
+        </div>
       </div>
     </div>
   );
