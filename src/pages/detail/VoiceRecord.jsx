@@ -144,15 +144,24 @@ export default function VoiceRecordList() {
       )}
 
       <div className="record-list" style={{ display: "grid", gap: 8 }}>
-        {items.map(({ id, record, meta }) => (
-          <Link key={id} to={`/voice-record/${id}`} state={meta} style={{ textDecoration: "none" }}>
-            <VoiceRecordCard record={record} />
-          </Link>
-        ))}
-        {loading && Array.from({ length: 2 }).map((_, i) => (
-          <div key={`sk-${i}`} style={{ height: 72, borderRadius: 12, background: "rgba(255,255,255,0.06)" }} />
-        ))}
-      </div>
+  {items.map(({ id, record, meta }) => (
+    <Link
+      key={id}
+      to={`/voice-record/${id}`}
+      state={{
+        voice_id: id,                 // 상세에서 transcript id로 사용
+        id,
+        name: record.name,            // 카드 제목
+        durationLabel: meta.durationLabel,
+        detectedAt: meta.detectedAt,
+        score: meta.score,
+      }}
+      style={{ textDecoration: "none" }}
+    >
+      <VoiceRecordCard record={record} />
+    </Link>
+  ))}
+</div>
 
       <div style={{ marginTop: 12 }}>
         {loading ? (
