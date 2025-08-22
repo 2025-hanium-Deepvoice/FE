@@ -27,6 +27,7 @@
     border-radius: 1rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     margin-bottom: 2rem; // 카드 간 간격
+    overflow: visible;   // ✅ 내부 요소 잘리지 않도록
 
     .input-group {
       margin-top: 0.75rem;
@@ -81,7 +82,9 @@
           align-items: center;
           justify-content: center;
 
-          svg { color: #fff; }
+          svg {
+            color: #fff;
+          }
         }
 
         .preview-image {
@@ -242,4 +245,76 @@
     cursor: pointer;
     font-weight: 600;
   }
+}
+
+/* 페이지 전체 가로 스크롤 방지 */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+/* 바깥 래퍼 */
+.voice-wrap {
+  
+  background-color: #0f0f0f; /* 검은 배경 */
+  overflow-x: hidden;
+}
+
+/* 실제 콘텐츠 컨테이너 */
+.voice-upload {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+/* 카드 내부 요소 안전장치 */
+.voice-upload .profile-box * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 오디오 플레이어 */
+.voice-upload .profile-box .audio-preview {
+  width: 100%;
+  display: block;
+}
+
+/* JSON 응답 박스 */
+.json-view {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 260px;
+}
+
+/* 긴 링크 줄바꿈 */
+.file-link {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 420px) {
+  .voice-upload {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+html { 
+  overflow-y: scroll !important;   /* 항상 세로 스크롤바 표시 */
+}
+
+/* 지원 브라우저에서 여백을 안정적으로 예약 */
+html, body {
+  scrollbar-gutter: stable both-edges;
+}
+
+/* .voice-wrap는 스크롤 컨테이너가 아님 (overflow/height 지정 X) */
+.voice-wrap {
+  /* min-height는 유지, overflow-y는 지정하지 않음 */
+  scrollbar-gutter: stable both-edges; /* 있어도 무해 */
 }

@@ -1,4 +1,4 @@
-import { FiPhoneCall, FiDownload } from 'react-icons/fi';
+import { FiPhoneCall, FiDownload } from "react-icons/fi";
 
 const VoiceAnalysisInfo = ({ messages, type, tips }) => {
   return (
@@ -7,9 +7,7 @@ const VoiceAnalysisInfo = ({ messages, type, tips }) => {
         <h3>전체 대화 보기</h3>
         {messages.map((msg, index) => (
           <div key={index} className="chat-bubble">
-            <p className="chat-text">
-              ⚠️ {msg.text}
-            </p>
+            <p className="chat-text">⚠️ {msg.text}</p>
             {msg.sub && <p className="chat-sub">{msg.sub}</p>}
           </div>
         ))}
@@ -33,14 +31,8 @@ const VoiceAnalysisInfo = ({ messages, type, tips }) => {
       </section>
 
       <div className="button-row">
-        <button className="report-btn">
-          <FiPhoneCall />
-          신고하기
-        </button>
-        <button className="save-btn">
-          <FiDownload />
-          결과 저장
-        </button>
+        <button className="report-btn"><FiPhoneCall />신고하기</button>
+        <button className="save-btn"><FiDownload />결과 저장</button>
       </div>
     </div>
   );
