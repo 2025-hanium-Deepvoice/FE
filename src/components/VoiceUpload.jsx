@@ -1,10 +1,30 @@
 import React, { useState, useRef } from 'react';
-import { Mic, User, Pencil, X } from 'lucide-react';
+import { Mic, User, Pencil, X, UploadCloud } from 'lucide-react';
 import '../assets/sass/setting/_voice-upload.scss';
+import { apiCreateProfile } from "../store/endpoint";
+
+const API_BASE = import.meta?.env?.VITE_API_BASE || 'https://deepvoice-be.shop';
+const API_PATH = '/profiles'; // 명세서 기준: /profiles
+
+const ALLOWED_MIME = new Set([
+  'audio/mpeg',   // mp3
+  'audio/mp4',    // m4a
+  'audio/wav',
+  'audio/webm',
+  'audio/x-wav',
+]);
+const MAX_SIZE = 50 * 1024 * 1024;
+
+const getToken = () => localStorage.getItem('token') || '';
+
+const blobToFile = (blob, filename, forceType) => {
+  const type = forceType || blob.type || 'audio/webm';
+  return new File([blob], filename, { type });
+};
 
 const VoiceUpload = () => {
   const [profiles, setProfiles] = useState([
-    { name: '', relation: '', audioURL: '', isRecorded: false, image: null },
+    { name: '', relation: '', audioURL: '', voiceFile: null, isRecorded: false, image: null, uploading: false, error: null, justUploaded: false },
   ]);
 
   const [showPopup, setShowPopup] = useState(false);
@@ -40,24 +60,31 @@ const VoiceUpload = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const options =
+        (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm'))
+          ? { mimeType: 'audio/webm' }
+          : undefined;
+
+      const recorder = new MediaRecorder(stream, options);
 
       recorder.ondataavailable = (e) => {
-        audioChunks.current.push(e.data);
+        if (e.data && e.data.size > 0) audioChunks.current.push(e.data);
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        const blob = new Blob(audioChunks.current, { type: recorder.mimeType || 'audio/webm' });
         const url = URL.createObjectURL(blob);
         audioChunks.current = [];
 
+        const file = blobToFile(blob, `recording_${Date.now()}.webm`, 'audio/webm');
+
         const updated = [...profiles];
         updated[currentIndex].audioURL = url;
+        updated[currentIndex].voiceFile = file;
         updated[currentIndex].isRecorded = true;
         setProfiles(updated);
         setShowPopup(false);
 
-        // 마이크 스트림 해제
         stream.getTracks().forEach((t) => t.stop());
       };
 
@@ -66,6 +93,11 @@ const VoiceUpload = () => {
       setIsRecording(true);
     } catch (err) {
       console.error('음성 녹음 권한이 거부되었습니다:', err);
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[currentIndex].error = '마이크 권한을 허용해 주세요.';
+        return u;
+      });
     }
   };
 
@@ -77,8 +109,143 @@ const VoiceUpload = () => {
   const addProfile = () => {
     setProfiles((prev) => [
       ...prev,
-      { name: '', relation: '', audioURL: '', isRecorded: false, image: null },
+      { name: '', relation: '', audioURL: '', voiceFile: null, isRecorded: false, image: null, uploading: false, error: null, justUploaded: false },
     ]);
+  };
+
+  const handleVoiceFileSelect = (index, file) => {
+    if (!file) return;
+    if (!ALLOWED_MIME.has(file.type)) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '허용되지 않는 오디오 형식입니다. (mp3, m4a, wav, webm)';
+        return u;
+      });
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '파일 크기가 50MB를 초과합니다.';
+        return u;
+      });
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setProfiles((prev) => {
+      const u = [...prev];
+      u[index].audioURL = url;
+      u[index].voiceFile = file;
+      u[index].isRecorded = false;
+      u[index].error = null;
+      return u;
+    });
+  };
+
+  // 서버 업로드
+  const uploadProfile = async (index) => {
+    const profile = profiles[index];
+    const token = getToken();
+
+    if (!token) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '로그인이 필요합니다. (JWT 토큰이 없습니다)';
+        return u;
+      });
+      return;
+    }
+    if (!profile.name.trim() || !profile.relation.trim()) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '이름과 관계를 입력해 주세요.';
+        return u;
+      });
+      return;
+    }
+    if (!profile.voiceFile) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '업로드할 음성 파일이 없습니다. 녹음하거나 파일을 선택해 주세요.';
+        return u;
+      });
+      return;
+    }
+    if (!ALLOWED_MIME.has(profile.voiceFile.type)) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '허용되지 않는 오디오 형식입니다. (mp3, m4a, wav, webm)';
+        return u;
+      });
+      return;
+    }
+    if (profile.voiceFile.size > MAX_SIZE) {
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].error = '파일 크기가 50MB를 초과합니다.';
+        return u;
+      });
+      return;
+    }
+
+    setProfiles((prev) => {
+      const u = [...prev];
+      u[index].uploading = true;
+      u[index].error = null;
+      u[index].justUploaded = false;
+      return u;
+    });
+
+    const form = new FormData();
+    form.append('name', profile.name.trim());
+    form.append('relation', profile.relation.trim());
+    form.append('voice', profile.voiceFile);
+
+    try {
+      const res = await fetch(`${API_BASE}${API_PATH}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: form,
+      });
+
+      if (res.status !== 201) {
+        let msg = '';
+        try {
+          const errJson = await res.clone().json();
+          msg = errJson?.message || '';
+        } catch {
+          msg = await res.text().catch(() => '');
+        }
+        throw new Error(msg || `업로드 실패 (HTTP ${res.status})`);
+      }
+
+      // 성공: UI는 숨김, 버튼 옆 뱃지만 잠깐 표시
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].uploading = false;
+        u[index].justUploaded = true;
+        return u;
+      });
+
+      setTimeout(() => {
+        setProfiles((prev) => {
+          const u = [...prev];
+          if (u[index]) u[index].justUploaded = false;
+          return u;
+        });
+      }, 2500);
+    } catch (e) {
+      console.error(e);
+      setProfiles((prev) => {
+        const u = [...prev];
+        u[index].uploading = false;
+        u[index].error = e.message || '업로드 중 오류가 발생했습니다.';
+        return u;
+      });
+    }
   };
 
   return (
@@ -142,6 +309,17 @@ const VoiceUpload = () => {
               />
             </div>
 
+            {/* 오디오 선택(파일) */}
+            <div className="input-group">
+              <label>오디오 파일 선택(선택)</label>
+              <input
+                type="file"
+                accept=".mp3,.m4a,.wav,.webm,audio/*"
+                onChange={(e) => handleVoiceFileSelect(index, e.target.files?.[0])}
+              />
+              <small className="hint">허용: mp3, m4a, wav, webm / 최대 50MB</small>
+            </div>
+
             {/* 녹음 영역 */}
             <div className="record-section">
               <div className="record-label">
@@ -158,13 +336,40 @@ const VoiceUpload = () => {
                 </button>
 
                 {profile.audioURL && (
-                  <audio
-                    controls
-                    src={profile.audioURL}
-                    className="audio-preview"
-                  />
+                  <audio controls src={profile.audioURL} className="audio-preview" />
                 )}
               </div>
+            </div>
+
+            {/* 업로드 버튼 & 상태 */}
+            <div className="upload-row" style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+              <button
+                type="button"
+                className="upload-btn"
+                onClick={() => uploadProfile(index)}
+                disabled={profile.uploading}
+                title="서버로 업로드"
+              >
+                <UploadCloud size={18} />
+                <span>{profile.uploading ? '업로드 중...' : '서버로 업로드'}</span>
+              </button>
+
+              {/* ✅ 성공 뱃지(잠깐 표시) */}
+              {profile.justUploaded && (
+                <span style={{
+                  background:'#16a34a',
+                  color:'#fff',
+                  padding:'6px 10px',
+                  borderRadius:8,
+                  fontSize:12,
+                  fontWeight:700
+                }}>
+                  업로드 완료
+                </span>
+              )}
+
+              {/* 에러만 유지 */}
+              {profile.error && <p className="error-text" style={{color:'#ff7b7b',margin:0}}>{profile.error}</p>}
             </div>
           </div>
         ))}
