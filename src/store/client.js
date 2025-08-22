@@ -1,18 +1,30 @@
 // src/store/client.js
 const API_BASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env && (import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL)) ||
+  (typeof import.meta !== "undefined" && import.meta.env &&
+    (import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL)) ||
   process.env.REACT_APP_API_BASE_URL ||
   "https://deepvoice-be.shop";
 
+// "Bearer xxx" 혹은 공백/따옴표가 섞인 값을 순수 토큰으로 정규화
+function normalizeToken(raw) {
+  if (!raw) return "";
+  let t = String(raw).trim();
+  if (t.startsWith("Bearer ")) t = t.slice(7).trim();
+  // 따옴표로 감싼 문자열 제거
+  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+    t = t.slice(1, -1);
+  }
+  return t;
+}
+
 function readToken() {
-  // 로그인 로직에 따라 키가 제각각일 수 있어서 전부 시도
-  return (
+  const raw =
     localStorage.getItem("access_token") ||
     localStorage.getItem("token") ||
     localStorage.getItem("jwt") ||
     sessionStorage.getItem("access_token") ||
-    ""
-  );
+    "";
+  return normalizeToken(raw);
 }
 
 export function authHeader() {
@@ -20,35 +32,58 @@ export function authHeader() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const isJsonBody = (v) =>
+  v &&
+  typeof v === "object" &&
+  !(v instanceof FormData) &&
+  !(v instanceof Blob) &&
+  !(v instanceof ArrayBuffer);
+
 export async function http(path, options = {}) {
   const url = /^https?:\/\//i.test(path) ? path : `${API_BASE_URL}${path}`;
-  const finalOptions = {
-    ...options,
-    headers: {
-      ...(options.headers || {}),
-    },
-  };
-  // Authorization이 없으면 여기서라도 주입
-  if (!("Authorization" in finalOptions.headers)) {
-    Object.assign(finalOptions.headers, authHeader());
+  const { method = "GET", body, headers = {}, auth = true, signal } = options;
+
+  const hdrs = new Headers(headers);
+  if (!hdrs.has("Accept")) hdrs.set("Accept", "application/json");
+  if (auth && !hdrs.has("Authorization")) {
+    const token = readToken();
+    if (token) hdrs.set("Authorization", `Bearer ${token}`);
   }
 
-  // 디버그 로그 (필요 없으면 지워도 됨)
-  const token = readToken();
-  console.log("[HTTP] →", url, finalOptions.method || "GET", {
-    hasAuth: !!token,
-    authHeader: finalOptions.headers.Authorization ? "set" : "not-set",
-  });
-
-  const res = await fetch(url, finalOptions);
-  if (!res.ok) {
-    let msg = `[${res.status}] ${res.statusText}`;
-    try {
-      const text = await res.text();
-      if (text) msg += ` - ${text}`;
-    } catch {}
-    throw new Error(msg);
+  let finalBody = body;
+  if (isJsonBody(body)) {
+    if (!hdrs.has("Content-Type")) hdrs.set("Content-Type", "application/json");
+    finalBody = JSON.stringify(body);
   }
+
+  const res = await fetch(url, { method, headers: hdrs, body: finalBody, signal });
+
   const ct = res.headers.get("content-type") || "";
-  return ct.includes("application/json") ? res.json() : res;
+  const parse = async () =>
+    ct.includes("application/json") ? await res.json() : await res.text();
+
+  if (!res.ok) {
+    let data = null;
+    try { data = await parse(); } catch {}
+    const err = new Error(
+      (data && (data.message || data.error)) || res.statusText || "Request failed"
+    );
+    err.status = res.status;
+    err.data = data;
+
+    // 🔴 401이면 토큰 정리 + 로그인으로 이동(전역 처리)
+    if (res.status === 401) {
+      ["access_token", "token", "jwt"].forEach((k) => localStorage.removeItem(k));
+      try {
+        const from = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.assign(`/login?from=${from}`);
+      } catch {
+        window.location.assign(`/login`);
+      }
+    }
+    throw err;
+  }
+
+  if (res.status === 204) return null;
+  return ct.includes("application/json") ? await res.json() : res;
 }

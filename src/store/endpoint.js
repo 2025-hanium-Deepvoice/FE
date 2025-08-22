@@ -5,7 +5,7 @@ import { http, authHeader } from "./client";
  * 간단한 쿼리스트링 헬퍼
  * 예: qs({ skip: 0, take: 10 }) -> "?skip=0&take=10"
  */
-function qs(params = {}) {
+const qs = (params = {}) => {
   const s = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
     if (v === undefined || v === null) return;
@@ -13,7 +13,7 @@ function qs(params = {}) {
   });
   const q = s.toString();
   return q ? `?${q}` : "";
-}
+};
 
 /**
  * 내 정보 조회
@@ -33,14 +33,9 @@ export function apiGetMe() {
  *   meta: { total, skip, take }
  * }
  */
-export function apiGetAnalyses({ skip = 0, take = 20 } = {}) {
-  const query = qs({ skip, take });
-  return http(`/analyses${query}`, {
-    method: "GET",
-    headers: { ...authHeader() },
-  });
+export function apiGetAnalyses({ skip = 0, take = 10 } = {}) {
+  return http(`/analyses${qs({ skip, take })}`, { method: "GET" });
 }
-
 /**
  * 음성기록 상세(Transcript) 조회
  * GET /transcripts/:id
@@ -49,14 +44,8 @@ export function apiGetAnalyses({ skip = 0, take = 20 } = {}) {
  * { transcript, type, guidance, ... }
  */
 export function apiGetTranscript(id) {
-  const n = Number(id);
-  if (!Number.isInteger(n) || n < 0) {
-    throw new Error(`apiGetTranscript: invalid id "${id}"`);
-  }
-  return http(`/transcripts/${n}`, {
-    method: "GET",
-    headers: { ...authHeader() },
-  });
+  if (!id && id !== 0) throw new Error("transcript id가 필요합니다.");
+  return http(`/transcripts/${id}`, { method: "GET" });
 }
 
 /**
@@ -64,7 +53,7 @@ export function apiGetTranscript(id) {
  * POST /profiles
  * multipart/form-data (FormData 자동 Content-Type)
  */
-export async function apiCreateProfile({ name, relation, voice }) {
+export async function apiCreateProfile({ name, relation, voice }, { signal }) {
   const ALLOWED_MIME = new Set([
     "audio/mpeg",   // mp3
     "audio/mp4",    // m4a
@@ -91,4 +80,5 @@ export async function apiCreateProfile({ name, relation, voice }) {
     body: form,
     headers: { ...authHeader() }, // 토큰만 추가
   });
+   return http(`/profiles`, { method: "POST", body: form, signal });
 }
