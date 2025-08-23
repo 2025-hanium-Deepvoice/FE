@@ -5,6 +5,7 @@ import VoiceAlertCard from "../../components/detail/VoiceAlertCard";
 import VoiceRecordCard from "../../components/detail/VoiceRecordCard";
 import VoiceAnalysisInfo from "../../components/detail/VoiceInfo";
 import { apiGetTranscript } from "../../store/endpoint";
+import { FiChevronLeft, FiMoreHorizontal } from "react-icons/fi";
 
 function splitTranscriptToMessages(text = "") {
   const parts = text
@@ -24,7 +25,7 @@ export default function TranscriptDetail({ useAlertCard = false }) {
   const { id: idFromParams } = useParams();
   const location = useLocation();
 
-  // ✅ 여러 경로에서 transcript id 확보: /voice-record/:id, /voice-info?id=1, Link state
+  // 여러 경로에서 id 확보
   const search = new URLSearchParams(location.search);
   const idFromQuery = search.get("id");
   const idFromState = location.state?.voice_id || location.state?.id;
@@ -35,7 +36,6 @@ export default function TranscriptDetail({ useAlertCard = false }) {
   const [data, setData] = useState(null); // { id, transcript, type, guidance, voice_id }
 
   useEffect(() => {
-    // ❗ id 없으면 호출하지 않음
     if (!transcriptId) {
       setErr("transcript id가 필요합니다.");
       return;
@@ -45,7 +45,7 @@ export default function TranscriptDetail({ useAlertCard = false }) {
       try {
         setLoading(true);
         setErr("");
-        const res = await apiGetTranscript(transcriptId); // GET /transcripts/:id
+        const res = await apiGetTranscript(transcriptId);
         if (!alive) return;
         setData(res);
       } catch (e) {
@@ -56,59 +56,65 @@ export default function TranscriptDetail({ useAlertCard = false }) {
         setLoading(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [transcriptId]);
 
   // 리스트에서 넘겨준 메타(없으면 기본값)
   const meta = location.state || {};
-  const record = useMemo(
-    () => ({
-      id: Number(transcriptId) || 0,
-      name: meta?.name || "통화 기록",
-      date: meta?.detectedAt || "",
-      duration: meta?.durationLabel || "",
-      emoji: "🙂",
-      suspicious:
-        typeof meta?.score === "number" ? meta.score >= 70 : !!data?.type,
-      score: typeof meta?.score === "number" ? meta.score : 0,
-    }),
-    [transcriptId, meta, data]
-  );
+  const record = useMemo(() => ({
+    id: Number(transcriptId) || 0,
+    name: meta?.name || "통화 기록",
+    date: meta?.detectedAt || "",
+    duration: meta?.durationLabel || "",
+    emoji: "🙂",
+    suspicious: typeof meta?.score === "number" ? meta.score >= 70 : !!data?.type,
+    score: typeof meta?.score === "number" ? meta.score : 0,
+  }), [transcriptId, meta, data]);
 
-  // API → VoiceAnalysisInfo props 매핑
+  // API → VoiceAnalysisInfo props
   const chatMessages = useMemo(
     () => (data?.transcript ? splitTranscriptToMessages(data.transcript) : []),
     [data]
   );
 
   const analysis = useMemo(
-    () =>
-      data
-        ? {
-            scamType: data.type || "-",
-            features: "급박한 송금/기관 사칭 등 위험 신호 탐지",
-          }
-        : { scamType: "-", features: "-" },
+    () => data
+      ? { scamType: data.type || "-", features: "급박한 송금/기관 사칭 등 위험 신호 탐지" }
+      : { scamType: "-", features: "-" },
     [data]
   );
 
   const tips = useMemo(() => (data?.guidance ? [data.guidance] : []), [data]);
 
   return (
-    <div className="VoiceInfo_wrap VoiceRecord_wrap container" style={{ padding: 16 }}>
-      <div className="header">
-        <button className="back" onClick={() => navigate(-1)}>
-          ←
+    // ✅ 리스트 화면과 동일한 래퍼/클래스 사용
+    <div className="container2 VoiceDetail_wrap">
+      {/* ✅ 공통 topbar */}
+      <div className="topbar">
+        <button
+          className="icon-btn"
+          aria-label="뒤로가기"
+          onClick={() => navigate(-1)}
+        >
+          <FiChevronLeft />
         </button>
-        <h2 style={{ margin: 0 }}>상세 분석</h2>
-        <div className="filter" />
+        <h2>상세 분석보기</h2>
+        <button className="icon-btn" aria-label="메뉴">
+          <FiMoreHorizontal />
+        </button>
       </div>
 
       {/* 상단 카드 */}
-      <div className="record-list" style={{ marginBottom: 12 }}>
-        {useAlertCard ? <VoiceAlertCard /> : <VoiceRecordCard record={record} />}
+      <div className="detail-head">
+        {record.suspicious ? (
+          <VoiceAlertCard
+            score={record.score}
+            detectedAt={record.date}
+            durationLabel={record.duration}
+          />
+        ) : (
+          <VoiceRecordCard record={record} />
+        )}
       </div>
 
       {/* 본문 */}
