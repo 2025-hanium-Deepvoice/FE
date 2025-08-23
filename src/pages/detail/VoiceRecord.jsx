@@ -4,23 +4,11 @@ import { Link } from "react-router-dom";
 import { apiGetAnalyses } from "../../store/endpoint";
 import VoiceRecordCard from "../../components/detail/VoiceRecordCard";
 
-const USE_DUMMY = true; // 👈 개발 중엔 true로 두면 더미 사용
-
-const fmtDate = (iso) => {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}.${m}.${day}`;
-};
-
-const fmtDuration = (sec) => {
-  if (!Number.isFinite(sec)) return "";
-  const m = Math.floor(sec / 60);
-  const s = String(Math.floor(sec % 60)).padStart(2, "0");
-  return `${m}:${s}`;
-};
+import {
+  USE_DUMMY_ANALYSES,
+  makeDummyAnalysesResponse,
+  mapAnalysesToView,
+} from "../../store/analyses.mock";
 
 export default function VoiceRecordList() {
   const [items, setItems] = useState([]);   // [{ id, record, meta }]
@@ -37,78 +25,15 @@ export default function VoiceRecordList() {
       setErr("");
 
       let data;
-      if (USE_DUMMY) {
-        // 🔹 명세와 동일한 스키마의 더미
-        data = {
-          items: [
-            {
-              id: 1,
-              file_name: "엄마의 통화 기록",
-              file_path: "uploads/voices/sample_file.m4a",
-              duration_seconds: 195,
-              is_phishing: true,
-              confidence: 88,
-              detected_at: "2025-08-23T09:00:00.000Z",
-            },
-            {
-              id: 2,
-              file_name: "아빠와의 통화 기록",
-              file_path: "uploads/voices/sample2.m4a",
-              duration_seconds: 75,
-              is_phishing: false,
-              confidence: 12,
-              detected_at: "2025-08-23T09:00:00.000Z",
-            },
-            {
-              id: 3,
-              file_name: "이모와의 통화 기록",
-              file_path: "uploads/voices/sample3.m4a",
-              duration_seconds: 200,
-              is_phishing: false,
-              confidence: 20,
-              detected_at: "2025-08-23T09:00:00.000Z",
-            },
-            {
-              id: 4,
-              file_name: "큰아빠와의 통화 기록",
-              file_path: "uploads/voices/sample4.m4a",
-              duration_seconds: 330,
-              is_phishing: true,
-              confidence: 88,
-              detected_at: "2025-08-23T09:00:00.000Z",
-            },
-          ],
-          meta: { total: 4, skip: nextSkip, take },
-        };
+      if (USE_DUMMY_ANALYSES) {
+        data = makeDummyAnalysesResponse(nextSkip, take);
       } else {
-        // 🔹 실제 API
-        data = await apiGetAnalyses({ skip: nextSkip, take });
-      }
+         data = await apiGetAnalyses({ skip: nextSkip, take });
+       }
 
       const totalCount = data?.meta?.total ?? 0;
-      const mapped = (data?.items || []).map((it) => {
-        const id = Number(it.id);
-        const durationLabel = fmtDuration(it.duration_seconds);
-        const dateLabel = fmtDate(it.detected_at);
-        const score = it.confidence;
-
-        return {
-          id,
-          durationLabel,
-          dateLabel,
-          score,
-          record: {
-            emoji: "🙂",
-            name: it.file_name,
-            suspicious: !!it.is_phishing,
-            score,          // 카드에서 %로 렌더
-            date: dateLabel,
-            duration: durationLabel,
-          },
-          meta: { score, detectedAt: dateLabel, durationLabel },
-        };
-      });
-
+      const mapped = mapAnalysesToView(data);
+      
       setTotal(totalCount);
       setItems((prev) => (nextSkip === 0 ? mapped : [...prev, ...mapped]));
       setSkip(nextSkip + take);
