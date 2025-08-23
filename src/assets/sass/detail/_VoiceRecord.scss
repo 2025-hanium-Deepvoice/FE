@@ -1,129 +1,122 @@
-.VoiceRecord_wrap {
+/* 음성기록 리스트 페이지 */
+.container2.VoiceRecord_wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+
   .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-
-    .back,
-    .filter {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      margin: 0 110px 0 110px;
-    }
+    gap: 8px;
+    margin-bottom: 16px;
 
     h2 {
       font-size: 20px;
       margin: 0;
-      color: white;
-      font-weight: 500;
-      white-space: nowrap;
+      color: #fff;
+      font-weight: 700;
     }
   }
 
-  .search-bar {
-    margin-bottom: 20px;
-
-    input {
-      width: 340px;
-      padding: 12px 18px;
-      border-radius: 12px;
-      border: none;
-      background-color: #2c2c2c;
-      color: white;
-      font-size: 14px;
-      margin-bottom: 10px;
-
-      &::placeholder {
-        color: #aaa;
-      }
-    }
-  }
-
+  /* 리스트 래퍼: grid 사용 (인라인 스타일 제거 예정) */
   .record-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 16px;
+  }
 
-    .record-card {
+  /* Link가 block이 아니면 카드가 100% 못 먹음 */
+  .record-list a {
+    display: block;
+    text-decoration: none;
+  }
+
+  /* 카드: 페이지 전용 스타일을 '무조건' 적용 */
+  .record-card {
+    /* 전역 .record-card가 있어도 이 페이지에서는 아래 규칙이 우선 적용되도록 */
+    display: grid !important;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;                /* ✅ 고정폭 340px 제거 */
+    padding: 20px;
+    border-radius: 16px;
+    background: #1f1f1f;
+    transition: 0.2s;
+    overflow: hidden;
+
+    &.suspicious { background: #d11515; }
+
+    .left {
+      display: contents;       /* avatar / info 그대로 3열 그리드에 배치 */
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #2a2a2a;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+    }
+
+    .info {
       display: flex;
-      width: 340px;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 16px;
-      padding: 20px;
-      background-color: #1f1f1f;
-      transition: 0.2s;
+      flex-direction: column;
+      color: #ffdfdf;
+      min-width: 0;
 
-      &.suspicious {
-        background-color: #d11515;
+      .name {
+        font-weight: 800;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.no-warning { margin-bottom: 8px; }
       }
 
-      .left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .avatar {
-          width: 44px;
-          height: 44px;
-          font-size: 30px;
-        }
-
-        .info {
-          display: flex;
-          flex-direction: column;
-          color: #ffdfdf;
-
-          .name {
-            font-weight: bold;
-            font-size: 14px;
-
-            &.no-warning {
-                margin-bottom: 10px;
-            }
-            }
-
-          .warning {
-            font-size: 13px;
-            margin: 4px 0;
-          }
-
-          .date {
-            font-size: 12px;
-          }
-        }
+      .warning {
+        font-size: 13px;
+        margin: 4px 0;
+        font-weight: 800;
+        color: #fff;
+        background: rgba(0,0,0,.2);
+        padding: 4px 10px;
+        border-radius: 999px;
+        display: inline-block;
+        width: fit-content;
       }
 
-      .right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 8px;
+      .date { font-size: 12px; color: #d6d6d6; }
+    }
 
-        .duration {
-          font-size: 14px;
-          color: #a99cf5;
-          font-weight: bold;
-          margin-right:5px;
-        }
+    .right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
 
-        .play-btn {
-          background-color: #a99cf5;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          font-size: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-        }
+      .duration {
+        font-size: 14px;
+        color: #a99cf5;
+        font-weight: 800;
+        margin-right: 4px;
+      }
+
+      .play-btn {
+        background-color: #a99cf5;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
       }
     }
   }

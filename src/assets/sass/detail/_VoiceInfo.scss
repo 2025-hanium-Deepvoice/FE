@@ -1,34 +1,55 @@
+/* 상세 공통 래퍼: VoiceInfo + VoiceRecord 공존 */
+.VoiceRecord_wrap,
+.VoiceInfo_wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+
+  /* 어떤 자식도 래퍼 폭을 넘지 못하게 */
+  * { box-sizing: border-box; }
+  > * { max-width: 100%; }
+}
+
+/* 헤더 */
 .VoiceInfo_wrap {
   .header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: -5px;
+    margin: 0 0 8px 0;
 
     .back {
       background: none;
       border: none;
-      color: white;
-      font-size: 23px;
+      color: #fff;
+      font-size: 22px;
       cursor: pointer;
-      margin-left: -170px;
+      margin-left: 0;            /* 🔧 음수 마진 제거 */
+      padding: 4px 8px;
+      border-radius: 8px;
+      &:hover { background: rgba(255,255,255,.06); }
     }
+    h2 { margin: 0; font-size: 18px; font-weight: 800; color: #fff; }
   }
 }
 
+/* 본문 */
 .voice-analysis-info {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 20px 20px 32px;
+  gap: 20px;
+  padding: 4px 0 32px;
 
   h3 {
     font-size: 17px;
-    font-weight: bold;
-    color: white;
-    margin: 0 0 3px 0;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 6px 0;
   }
 
+  /* 대화 보기 */
   .chat-section {
     display: flex;
     flex-direction: column;
@@ -38,16 +59,17 @@
       background-color: #2c2c2c;
       border-radius: 12px;
       padding: 14px 18px;
-      color: white;
+      color: #fff;
       font-size: 15px;
       display: flex;
       flex-direction: column;
+      max-width: 100%;
 
       .chat-text {
-        font-weight: bold;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-weight: 700;
+        white-space: pre-wrap;      /* 🔧 여러 줄 허용 */
+        word-break: keep-all;       /* 한글 자연 줄바꿈 */
+        overflow-wrap: anywhere;    /* 긴 토큰 강제 줄바꿈 */
       }
 
       .chat-sub {
@@ -58,49 +80,59 @@
     }
   }
 
+  /* 유형/방법 박스 */
   .analysis-box,
   .tips-box {
     background-color: #2c2c2c;
     border-radius: 12px;
     padding: 16px 18px;
-    margin-top: 11px;
     font-size: 15px;
-    color: white;
+    color: #fff;
     line-height: 1.5;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-top: 6px;
+    max-width: 100%;
 
-    p {
-      margin-bottom: 6px;
-      padding-top: 2px;
-    }
+    p { margin: 0 0 6px 0; }
   }
 
+  /* 버튼 행 */
   .button-row {
     display: flex;
     justify-content: space-between;
     gap: 12px;
     padding: 0 2px;
+    width: 100%;
+    max-width: 100%;
 
     button {
       flex: 1;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       font-size: 15px;
-      font-weight: bold;
+      font-weight: 700;
       padding: 14px;
       border-radius: 12px;
       border: none;
       cursor: pointer;
     }
-
-    .report-btn,
-    .save-btn {
+    .report-btn, .save-btn {
       background-color: #2c2c2c;
       color: #ff4d4d;
     }
   }
+}
+
+/* 상세 상단 알림/레코드 카드가 잘리지 않도록 */
+.record-list { margin: 8px 0 12px; }
+.record-card { overflow: hidden; width: 100%; }
+
+/* 모바일 여백 보정 */
+@media (max-width: 400px) {
+  .VoiceInfo_wrap, .VoiceRecord_wrap { padding: 12px; }
 }

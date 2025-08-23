@@ -33,7 +33,7 @@ export default function VoiceRecordList() {
 
       const totalCount = data?.meta?.total ?? 0;
       const mapped = mapAnalysesToView(data);
-      
+
       setTotal(totalCount);
       setItems((prev) => (nextSkip === 0 ? mapped : [...prev, ...mapped]));
       setSkip(nextSkip + take);
@@ -52,51 +52,52 @@ export default function VoiceRecordList() {
   const hasMore = items.length < total;
 
   return (
-    <div className="VoiceRecord_wrap container" style={{ padding: 16, display: "grid", gap: 12 }}>
-      <div className="header" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <h2 style={{ margin: 0 }}>음성기록</h2>
-      </div>
-
-      {err && (
-        <div style={{ color: "#f66", display: "flex", alignItems: "center", gap: 8 }}>
-          <span>{err}</span>
-          <button className="login-btn active" onClick={() => load(0)}>다시 시도</button>
-        </div>
-      )}
-
-      {!loading && !err && items.length === 0 && (
-        <div style={{ color: "#aaa", padding: "12px 0" }}>아직 분석된 음성 기록이 없어요.</div>
-      )}
-
-      <div className="record-list" style={{ display: "grid", gap: 8 }}>
-  {items.map(({ id, record, meta }) => (
-    <Link
-      key={id}
-      to={`/voice-record/${id}`}
-      state={{
-        voice_id: id,                 // 상세에서 transcript id로 사용
-        id,
-        name: record.name,            // 카드 제목
-        durationLabel: meta.durationLabel,
-        detectedAt: meta.detectedAt,
-        score: meta.score,
-      }}
-      style={{ textDecoration: "none" }}
-    >
-      <VoiceRecordCard record={record} />
-    </Link>
-  ))}
-</div>
-
-      <div style={{ marginTop: 12 }}>
-        {loading ? (
-          <button className="login-btn inactive" disabled>불러오는 중...</button>
-        ) : hasMore ? (
-          <button className="login-btn active" onClick={() => load(skip)}>더 보기</button>
-        ) : items.length > 0 ? (
-          <span style={{ color: "#888" }}>모든 기록을 다 불러왔어요.</span>
-        ) : null}
-      </div>
+  <div className="container2 VoiceRecord_wrap">
+    <div className="header">
+      <h2>음성기록</h2>
     </div>
-  );
+
+    {err && (
+      <div style={{ color: "#f66", display: "flex", alignItems: "center", gap: 8 }}>
+        <span>{err}</span>
+        <button className="login-btn active" onClick={() => load(0)}>다시 시도</button>
+      </div>
+    )}
+
+    {!loading && !err && items.length === 0 && (
+      <div style={{ color: "#aaa", padding: "12px 0" }}>아직 분석된 음성 기록이 없어요.</div>
+    )}
+
+    {/* ✅ 인라인 스타일 삭제: SCSS의 .record-list 사용 */}
+    <div className="record-list">
+      {items.map(({ id, record, meta }) => (
+        <Link
+          key={id}
+          to={`/voice-record/${id}`}
+          state={{
+            voice_id: id,
+            id,
+            name: record.name,
+            durationLabel: meta.durationLabel,
+            detectedAt: meta.detectedAt,
+            score: meta.score,
+          }}
+        >
+          <VoiceRecordCard record={record} />
+        </Link>
+      ))}
+    </div>
+
+    <div style={{ marginTop: 12 }}>
+      {loading ? (
+        <button className="login-btn inactive" disabled>불러오는 중...</button>
+      ) : hasMore ? (
+        <button className="login-btn active" onClick={() => load(skip)}>더 보기</button>
+      ) : items.length > 0 ? (
+        <span style={{ color: "#888" }}>모든 기록을 다 불러왔어요.</span>
+      ) : null}
+    </div>
+  </div>
+);
+
 }
