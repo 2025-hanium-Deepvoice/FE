@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+// src/pages/detail/VoiceRecordDetail.jsx
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import VoiceAlertCard from "../../components/detail/VoiceAlertCard";
 import VoiceRecordCard from "../../components/detail/VoiceRecordCard";
 import VoiceAnalysisInfo from "../../components/detail/VoiceInfo";
 import { apiGetTranscript } from "../../store/endpoint";
+import { FiChevronLeft, FiMoreHorizontal } from "react-icons/fi";
+import "../../assets/sass/detail/_VoiceInfo.scss";
 
 function splitTranscriptToMessages(text = "") {
   const parts = text
@@ -28,28 +31,23 @@ export default function VoiceRecordDetail({ useAlertCard = false }) {
   const [err, setErr] = useState("");
   const [data, setData] = useState(null);
 
-  // ✅ 페이지 내 "캡처 대상" 전용 래퍼
+  // 페이지 전체 캡처용 래퍼
   const captureRef = useRef(null);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setErr("");
-        const res = await apiGetTranscript(id);
-        if (!alive) return;
-        setData(res);
-      } catch (e) {
-        if (!alive) return;
-        setErr(e?.message || "상세 불러오기 실패");
-      } finally {
-        if (!alive) return;
-        setLoading(false);
-      }
-    })();
-    return () => { alive = false; };
+  const fetcher = useCallback(async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      const res = await apiGetTranscript(id);
+      setData(res);
+    } catch (e) {
+      setErr(e?.message || "상세 불러오기 실패");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => { fetcher(); }, [fetcher]);
 
   const meta = location.state || {};
   const record = useMemo(() => ({
@@ -69,34 +67,49 @@ export default function VoiceRecordDetail({ useAlertCard = false }) {
 
   const analysis = useMemo(() => ({
     scamType: data?.type || "-",
-    features: "급박한 송금/기관 사칭 등 위험 신호 탐지",
+    features: data?.features || "급박한 송금/기관 사칭 등 위험 신호 탐지",
   }), [data]);
 
-  const tips = useMemo(() => (data?.guidance ? [data.guidance] : []), [data]);
+  const tips = useMemo(() => (
+    data?.guidance ? [data.guidance] : ["경찰 또는 기관에 직접 확인하세요.", "돈을 요구하는 전화는 100% 보이스피싱입니다"]
+  ), [data]);
 
   return (
-    <div className="container2 VoiceRecord_wrap VoiceInfo_wrap">
-      {/* ✅ 이 래퍼(captureRef) 안의 모든 내용이 저장됨 */}
+    <div className="container2 VoiceInfo_wrap">
+      {/* 상단 바 */}
+      <div className="topbar">
+        <button className="icon-btn" aria-label="뒤로가기" onClick={() => navigate(-1)}>
+          <FiChevronLeft />
+        </button>
+        <h2>상세 분석보기</h2>
+        <button className="icon-btn" aria-label="메뉴">
+          <FiMoreHorizontal />
+        </button>
+      </div>
+
+      {/* 상단 카드: 의심 있으면 빨간 카드, 없으면 일반 카드 */}
+      <div className="detail-head">
+        {record.suspicious ? (
+          <VoiceAlertCard
+            name={record.name}
+            date={record.date}
+            duration={record.duration}
+            score={record.score}
+          />
+        ) : (
+          <VoiceRecordCard record={record} />
+        )}
+      </div>
+
+      {/* 본문 */}
       <div ref={captureRef} className="capture-area">
-        <div className="header">
-          <button className="back" onClick={() => navigate(-1)} aria-label="뒤로가기">←</button>
-          <h2>상세 분석</h2>
-          <div className="filter" aria-hidden="true" />
-        </div>
-
-        {/* 상단 카드 */}
-        <div className="record-list" style={{ marginBottom: 12 }}>
-          {useAlertCard ? <VoiceAlertCard /> : <VoiceRecordCard record={record} />}
-        </div>
-
-        {/* 본문 */}
         {loading ? (
-          <div style={{ color: "#aaa" }}>불러오는 중...</div>
+          <div className="inline-info">불러오는 중...</div>
         ) : err ? (
-          <div style={{ color: "#f66" }}>{err}</div>
+          <div className="inline-error">{err}</div>
         ) : (
           <VoiceAnalysisInfo
-            captureRef={captureRef}     // 반드시 전달
+            captureRef={captureRef}
             messages={messages}
             type={analysis}
             tips={tips}

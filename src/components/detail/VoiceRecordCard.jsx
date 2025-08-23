@@ -1,32 +1,38 @@
-import { FiPlay } from "react-icons/fi";
+// src/components/detail/VoiceRecordCard.jsx
+import React from "react";
+import { FiPlay, FiAlertTriangle } from "react-icons/fi";
 
 const VoiceRecordCard = ({ record }) => {
+  const { suspicious, score, name, date, duration, emoji, avatarUrl } = record;
+
   return (
-    <div className={`record-card ${record.suspicious ? "suspicious" : ""}`}>
-      {/* 왼쪽 영역 */}
-      <div className="left">
-        <div className="avatar">{record.emoji || "🙂"}</div>
-        <div className="info">
-          {/* 파일명 */}
-          <p className={`name ${!record.suspicious ? "no-warning" : ""}`}>
-            {record.name}
-          </p>
-
-          {/* 보이스피싱 의심 표시 */}
-          {record.suspicious && (
-            <p className="warning">
-              ⚠️ 보이스피싱 의심 {record.score}%
-            </p>
-          )}
-
-          {/* 날짜 */}
-          <p className="date">{record.date}</p>
-        </div>
+    <div className={`record-card ${suspicious ? "suspicious" : ""}`}>
+      {/* 아바타 */}
+      <div className="avatar">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" aria-hidden />
+        ) : (
+          <span aria-hidden>{emoji || "🙂"}</span>
+        )}
       </div>
 
-      {/* 오른쪽 영역 */}
+      {/* 정보 */}
+      <div className="info">
+        <p className="name">{name}</p>
+
+        {suspicious && (
+          <p className="warning" role="status">
+            <FiAlertTriangle className="warn-icon" aria-hidden />
+            보이스피싱 의심 <strong>{score}%</strong>
+          </p>
+        )}
+
+        <p className="date">{date}</p>
+      </div>
+
+      {/* 우측 영역 */}
       <div className="right">
-        <p className="duration">{record.duration}</p>
+        <p className="duration">{duration}</p>
         <button className="play-btn" aria-label="재생">
           <FiPlay />
         </button>
