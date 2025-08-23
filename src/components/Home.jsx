@@ -1,13 +1,14 @@
+// src/components/Home.jsx
 import React, { useRef, useState, useEffect } from "react";
 import { Play, ChevronRight, Mic, X } from "lucide-react";
 import "../assets/sass/setting/_home.scss";
 import { apiGetMe, apiGetAnalyses } from "../store/endpoint";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Home = ({
-  heroLogoSrc = "",
-  onUpload,
-}) => {
-  const fileRef = useRef(null);
+const Home = ({ heroLogoSrc = "", onUpload }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isUploading, setIsUploading] = useState(false);
   const abortRef = useRef(null);
 
@@ -56,9 +57,7 @@ const Home = ({
       }
     })();
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   // /analyses
@@ -90,30 +89,23 @@ const Home = ({
       }
     })();
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  const handlePick = () => fileRef.current?.click();
-
-  const handleChange = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
+  // ✅ 업로드 공통 처리
+  const startUpload = async (file, extra = {}) => {
     setIsUploading(true);
     const controller = new AbortController();
     abortRef.current = controller;
 
     try {
       if (onUpload) {
-        await onUpload(file, { signal: controller.signal });
-        // 업로드 뒤 목록 새로고침 원하면 여기서 /analyses 다시 호출
+        await onUpload(file, { signal: controller.signal, ...extra });
+        // 필요하면 업로드 후 목록 새로고침
         // const data = await apiGetAnalyses({ skip: 0, take: 10 });
         // setRecords( ...map );
       } else {
-        await new Promise((r) => setTimeout(r, 1500));
+        await new Promise((r) => setTimeout(r, 1500)); // 데모용
       }
     } catch (err) {
       if (err?.name !== "AbortError") {
@@ -124,6 +116,23 @@ const Home = ({
       setIsUploading(false);
       abortRef.current = null;
     }
+  };
+
+  // ✅ select.jsx가 넘겨준 file/profileId 수신 → 자동 업로드
+  useEffect(() => {
+    const st = location.state;
+    if (st?.file) {
+      const { file, profileId } = st;
+      // state 제거(뒤로가기/새로고침 시 중복 업로드 방지)
+      navigate(location.pathname, { replace: true });
+      startUpload(file, { profileId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+
+  // ✅ 업로드 버튼 → 프로필 선택으로 이동
+  const handlePick = () => {
+    navigate("/select", { state: { returnTo: "/home" } });
   };
 
   const cancelUpload = () => {
@@ -159,14 +168,8 @@ const Home = ({
             </div>
           </div>
 
+          {/* 파일을 직접 고르지 않고, 프로필 선택 화면으로 이동 */}
           <button className="card__btn" onClick={handlePick}>업로드</button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="audio/*,.mp3,.wav,.m4a"
-            className="none"
-            onChange={handleChange}
-          />
         </div>
       </section>
 
@@ -186,7 +189,11 @@ const Home = ({
             <li key={r.id} className={`record ${risky ? "record--danger" : ""}`}>
               <div className="record__avatar">
                 {r.avatar ? (
-                  <img src={r.avatar} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  <img
+                    src={r.avatar}
+                    alt=""
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                  />
                 ) : (
                   <span className="record__emoji" role="img" aria-label="avatar">🙂</span>
                 )}
