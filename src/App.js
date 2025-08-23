@@ -12,29 +12,36 @@ import Signup from "./pages/login/signup";
 // 음성기록 (목록/상세)
 import VoiceRecordList from "./pages/detail/VoiceRecord";       // 목록
 import VoiceRecordDetail from "./pages/detail/TranscriptDetail"; // 상세
-import VoiceInfo from './pages/detail/VoiceRecordInfo.jsx'; 
-import VoiceAlert from './pages/detail/VoiceAlert.jsx'
+import VoiceInfo from "./pages/detail/VoiceRecordInfo.jsx"; 
+import VoiceAlert from "./pages/detail/VoiceAlert.jsx";
+//업로드 화면 연동
+import ProfileSelect from "./pages/select/select.jsx";
+
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 홈 */}
-        <Route path="/" element={<Home heroLogoSrc="/MainlogoWhite.png" />} />
-        <Route path="/home" element={<Home heroLogoSrc="/MainlogoWhite.png" />} />
+        {/* 기본 경로 → 로그인 화면 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* 인증 */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
+        {/* 로그인 후 접근 가능한 메인 페이지 */}
+        <Route path="/home" element={<Home heroLogoSrc="/MainlogoWhite.png" />} />
+
         {/* 기능 */}
         <Route path="/voice-upload" element={<VoiceUpload />} />
         <Route path="/voice-info" element={<VoiceInfo />} />
         <Route path="/voice-alert" element={<VoiceAlert />} />
+
         {/* 음성 기록 */}
-        
         <Route path="/voice-record" element={<VoiceRecordList />} />
         <Route path="/voice-record/:id" element={<VoiceRecordDetail />} />
-
+        {/* 업로드 후 프로필 화면 연동 */}
+        <Route path="/select" element={<ProfileSelect />} />
+        
         {/* 없는 경로 → 홈 */}
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>

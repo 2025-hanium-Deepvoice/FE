@@ -1,106 +1,214 @@
-.VoiceInfo_wrap {
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: -5px;
+/* =========================
+   상세 래퍼 공통
+   ========================= */
+.container2.VoiceInfo_wrap,
+.container2.VoiceDetail_wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 12px 16px 24px;
+  background: #0f0f10;
+  box-sizing: border-box;
+}
 
-    .back {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 23px;
-      cursor: pointer;
-      margin-left: -170px;
+/* 예전 header 겹침 방지 */
+.VoiceInfo_wrap .header,
+.VoiceDetail_wrap .header { display: none !important; }
+
+/* 상단바 */
+.VoiceInfo_wrap .topbar,
+.VoiceDetail_wrap .topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: #0f0f10 !important;
+
+  height: 48px;
+  display: grid !important;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+
+  padding: 6px 0 10px;
+  margin-bottom: 10px;
+}
+.VoiceInfo_wrap .topbar h2,
+.VoiceDetail_wrap .topbar h2 {
+  margin: 0 !important;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff !important;
+}
+.VoiceInfo_wrap .topbar .icon-btn,
+.VoiceDetail_wrap .topbar .icon-btn {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: none; border-radius: 12px;
+  background: #2a2a2a; color: #eaeaea;
+  cursor: pointer;
+}
+
+/* 상단 카드와 간격 */
+.VoiceInfo_wrap .detail-head,
+.VoiceDetail_wrap .detail-head { margin-top: 8px; margin-bottom: 12px; }
+
+/* =========================
+   레코드 카드
+   ========================= */
+.record-card {
+  display: grid !important;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 18px;
+  border-radius: 18px;
+  background: #1f1f1f;
+
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 12px; background: #2a2a2a;
+    display: grid; place-items: center;
+    font-size: 28px; color: #fff;
+  }
+  .info {
+    min-width: 0; display: flex; flex-direction: column;
+    .name {
+      color: #fff; font-weight: 800; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .warning {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,.22); color: #fff;
+      font-size: 13px; font-weight: 800;
+      margin: 6px 0 4px; padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .date { font-size: 12px; color: #ffe1e1; }
+  }
+  .right {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    .duration { font-size: 14px; color: #a99cf5; font-weight: 800; margin-right: 2px; }
+    .play-btn {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border: none; border-radius: 50%;
+      background: #a99cf5; color: #fff; cursor: pointer;
+    }
+  }
+}
+/* 의심 카드는 살짝 더 큼 */
+.VoiceInfo_wrap .record-card.suspicious { background: #d11515; padding: 20px; border-radius: 20px; }
+
+/* =========================
+   본문 섹션
+   ========================= */
+.voice-analysis-info {
+  display: flex; flex-direction: column;
+  gap: 20px; padding-bottom: 24px;
+
+  h3 { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #fff; }
+
+  .section-title-btn {
+    width: 100%; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 10px; border: 0;
+    background: transparent; color: #fff;
+    font-size: 18px; font-weight: 700; border-radius: 10px;
+  }
+
+  .chat-bubble {
+    background: #2c2c2c; border-radius: 14px;
+    padding: 14px 16px; color: #fff;
+    display: flex; gap: 12px;
+
+    .warn { flex: none; margin-top: 2px; }
+    .lines { flex: 1; min-width: 0; }
+
+    .chat-text {
+      font-size: 16px; font-weight: 800;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .chat-sub {
+      margin-top: 6px; font-size: 13px; color: #bdbdbd;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+  }
+
+  .analysis-box, .tips-box {
+    background: #2c2c2c; border-radius: 14px; padding: 16px 18px; color: #fff; line-height: 1.5;
+    p { margin: 0 0 6px 0; }
+  }
+
+  .button-row {
+    display: flex; gap: 12px;
+    button {
+      flex: 1;
+      border: none; border-radius: 12px; padding: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 16px; font-weight: 700;
+      background: #2c2c2c; color: #ff4d4d; cursor: pointer;
     }
   }
 }
 
-.voice-analysis-info {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 20px 20px 32px;
+/* =========================
+   모달 (포털 없이도 정확히 중앙)
+   ========================= */
 
-  h3 {
-    font-size: 17px;
-    font-weight: bold;
-    color: white;
-    margin: 0 0 3px 0;
-  }
+/* 배경 스크롤/클릭 잠금 */
+body.modal-open { overflow: hidden !important; height: 100% !important; }
+body.modal-open .container2,
+body.modal-open .VoiceDetail_wrap,
+body.modal-open .VoiceInfo_wrap { pointer-events: none; }
+body.modal-open .modal.is-open { pointer-events: auto; }
 
-  .chat-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* 컨테이너: 화면 전체 덮기 */
+:root body .modal.is-open {
+  position: fixed !important;
+  top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+  z-index: 10000 !important;
+  display: block !important;      /* 전역 flex/grid 규칙 무력화 */
+}
 
-    .chat-bubble {
-      background-color: #2c2c2c;
-      border-radius: 12px;
-      padding: 14px 18px;
-      color: white;
-      font-size: 15px;
-      display: flex;
-      flex-direction: column;
+/* 어두운 배경 */
+:root body .modal.is-open .modal__backdrop {
+  position: absolute !important; inset: 0 !important;
+  background: rgba(0,0,0,.6) !important;
+}
 
-      .chat-text {
-        font-weight: bold;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+/* ✅ 카드: 정확히 화면 정중앙 + 파란 박스 폭으로 제한 */
+:root body .modal.is-open .modal__card {
+  position: fixed !important; left: 50% !important; top: 50% !important;
+  transform: translate3d(-50%, -50%, 0) !important;
+  margin: 0 !important; bottom: auto !important; right: auto !important;
 
-      .chat-sub {
-        font-size: 13px;
-        color: #aaa;
-        margin-top: 7px;
-      }
-    }
-  }
+  width: 100% !important;
+  max-width: 360px !important;        /* ← 파란 박스 크기 (필요하면 320~380px로 조절) */
+  max-height: 82vh !important;
+  overflow: auto !important;
 
-  .analysis-box,
-  .tips-box {
-    background-color: #2c2c2c;
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-top: 11px;
-    font-size: 15px;
-    color: white;
-    line-height: 1.5;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  background: #1c1c1c !important; color: #fff !important;
+  border-radius: 16px !important; padding: 16px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,.4) !important;
+  will-change: transform !important;
+}
 
-    p {
-      margin-bottom: 6px;
-      padding-top: 2px;
-    }
-  }
+/* 전체 대화 보기(조금 더 넓게 필요하면) */
+:root body .modal.is-open .modal__card--xl {
+  width: 100% !important;
+  max-width: 420px !important;        /* 필요시 440~480px */
+}
 
-  .button-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 2px;
+/* 혹시 라이브러리 translate/bottom 등 충돌 방지 */
+:root body .modal.is-open,
+:root body .modal.is-open .modal__card {
+  transform-origin: 50% 50% !important;
+}
 
-    button {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: bold;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .report-btn,
-    .save-btn {
-      background-color: #2c2c2c;
-      color: #ff4d4d;
-    }
-  }
+/* 모바일 여백 보정 */
+@media (max-width: 400px) {
+  .VoiceInfo_wrap, .VoiceDetail_wrap { padding: 12px; }
 }

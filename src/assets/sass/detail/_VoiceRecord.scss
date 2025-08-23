@@ -1,130 +1,176 @@
-.VoiceRecord_wrap {
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* src/assets/sass/detail/_voice-record.scss */
 
-    .back,
-    .filter {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      margin: 0 110px 0 110px;
-    }
+/* 페이지 래퍼 */
+.container2.VoiceRecord_wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 12px 16px 20px;
+  box-sizing: border-box;
+  background-color: #161616;
+
+  /* 상단바 */
+  .topbar {
+    height: 48px;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+    margin-bottom: 10px;
 
     h2 {
-      font-size: 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
       margin: 0;
-      color: white;
-      font-weight: 500;
-      white-space: nowrap;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border: none; background: transparent; color: #e8e8e8;
+      font-size: 22px; cursor: pointer;
+      border-radius: 12px;
+
+      &:active { transform: translateY(1px); }
     }
   }
 
-  .search-bar {
-    margin-bottom: 20px;
+  /* 검색 바 */
+  .searchbar {
+    position: relative;
+    margin: 6px 0 14px;
+
+    .search-icon {
+      position: absolute;
+      left: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 18px; color: #a9a9a9;
+      pointer-events: none;
+    }
 
     input {
-      width: 340px;
-      padding: 12px 18px;
+      width: 100%; height: 44px;
+      padding: 0 12px 0 40px;
       border-radius: 12px;
-      border: none;
-      background-color: #2c2c2c;
-      color: white;
+      border: 1px solid #2a2a2a;
+      background: #1b1b1c;
+      color: #fff;
       font-size: 14px;
-      margin-bottom: 10px;
+      outline: none;
 
-      &::placeholder {
-        color: #aaa;
+      &::placeholder { color: #9d9d9d; }
+      &:focus { border-color: #5a59f0; }
+    }
+  }
+
+  .inline-error {
+    color: #ff9a9a;
+    display: flex; align-items: center; gap: 8px;
+    margin: 6px 0 10px;
+  }
+
+  .empty {
+    color: #b9b9b9;
+    padding: 10px 0 4px;
+  }
+
+  /* 리스트 */
+  .record-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .record-list a {
+    display: block;
+    text-decoration: none;
+  }
+
+  /* 카드 */
+  .record-card {
+    display: grid !important;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    background: #1f1f1f;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
+    transition: transform .08s ease;
+
+    &:active { transform: scale(0.996); }
+
+    /* 빨간 카드(의심) */
+    &.suspicious {
+      background: #d11515;
+      .info .name { color: #fff; }
+      .info .date { color: #ffe1e1; }
+    }
+
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: #2a2a2a;
+      display: grid; place-items: center;
+      font-size: 28px; overflow: hidden;
+
+      img { width: 100%; height: 100%; object-fit: cover; }
+      span { display: block; line-height: 1; }
+    }
+
+    .info {
+      min-width: 0;
+      display: flex; flex-direction: column;
+
+      .name {
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 14px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+
+      .warning {
+        margin: 6px 0 4px;
+        font-size: 13px; font-weight: 800; color: #fff;
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(0,0,0,.22);
+        padding: 4px 10px; border-radius: 999px;
+
+        .warn-icon { font-size: 14px; }
+        strong { margin-left: 2px; }
+      }
+
+      .date {
+        font-size: 12px;
+        color: #d6d6d6;
+      }
+    }
+
+    .right {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+
+      .duration {
+        font-size: 14px;
+        color: #a99cf5;
+        font-weight: 800;
+        margin-right: 2px;
+      }
+
+      .play-btn {
+        width: 36px; height: 36px;
+        display: grid; place-items: center;
+        border: none; border-radius: 50%;
+        background: #a99cf5; color: #fff;
+        font-size: 16px; cursor: pointer;
+
+        &:active { transform: translateY(1px); }
       }
     }
   }
 
-  .record-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    .record-card {
-      display: flex;
-      width: 340px;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 16px;
-      padding: 20px;
-      background-color: #1f1f1f;
-      transition: 0.2s;
-
-      &.suspicious {
-        background-color: #d11515;
-      }
-
-      .left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .avatar {
-          width: 44px;
-          height: 44px;
-          font-size: 30px;
-        }
-
-        .info {
-          display: flex;
-          flex-direction: column;
-          color: #ffdfdf;
-
-          .name {
-            font-weight: bold;
-            font-size: 14px;
-
-            &.no-warning {
-                margin-bottom: 10px;
-            }
-            }
-
-          .warning {
-            font-size: 13px;
-            margin: 4px 0;
-          }
-
-          .date {
-            font-size: 12px;
-          }
-        }
-      }
-
-      .right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 8px;
-
-        .duration {
-          font-size: 14px;
-          color: #a99cf5;
-          font-weight: bold;
-          margin-right:5px;
-        }
-
-        .play-btn {
-          background-color: #a99cf5;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          font-size: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-        }
-      }
-    }
+  .pager {
+    margin-top: 12px;
+    display: grid; place-items: center;
+    .all-loaded { color: #888; }
   }
 }

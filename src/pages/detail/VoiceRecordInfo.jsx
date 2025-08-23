@@ -1,22 +1,19 @@
 // src/pages/detail/VoiceRecordDetail.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import VoiceAlertCard from "../../components/detail/VoiceAlertCard";
 import VoiceRecordCard from "../../components/detail/VoiceRecordCard";
 import VoiceAnalysisInfo from "../../components/detail/VoiceInfo";
 import { apiGetTranscript } from "../../store/endpoint";
+import { FiChevronLeft, FiMoreHorizontal } from "react-icons/fi";
+import "../../assets/sass/detail/_VoiceInfo.scss";
 
 function splitTranscriptToMessages(text = "") {
-  // 문장 구분(., ?, !, ~, …, newline) 기준으로 간단 분할
   const parts = text
     .split(/(?<=[\.!?…~])\s+|\n+/g)
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
-
-  // 너무 짧으면 한 덩어리로
   if (parts.length <= 1) return [{ text }];
-
-  // 길면 1~2문장씩 묶어서 말풍선 만들기
   const out = [];
   for (let i = 0; i < parts.length; i += 2) {
     const chunk = [parts[i], parts[i + 1]].filter(Boolean).join(" ");
@@ -32,84 +29,93 @@ export default function VoiceRecordDetail({ useAlertCard = false }) {
 
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  const [data, setData] = useState(null); // { id, transcript, type, guidance, voice_id }
+  const [data, setData] = useState(null);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setErr("");
-        const res = await apiGetTranscript(id); // ✅ /transcripts/:id 호출
-        if (!alive) return;
-        setData(res);
-      } catch (e) {
-        if (!alive) return;
-        setErr(e?.message || "상세 불러오기 실패");
-      } finally {
-        if (!alive) return;
-        setLoading(false);
-      }
-    })();
-    return () => { alive = false; };
+  // 페이지 전체 캡처용 래퍼
+  const captureRef = useRef(null);
+
+  const fetcher = useCallback(async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      const res = await apiGetTranscript(id);
+      setData(res);
+    } catch (e) {
+      setErr(e?.message || "상세 불러오기 실패");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  // 리스트에서 넘겨준 메타 (없으면 기본값)
-  const meta = location.state || {};
-  const record = useMemo(() => {
-    // VoiceRecordCard가 기대하는 구조
-    return {
-      id: Number(id),
-      name: meta?.name || "통화 기록",
-      date: meta?.detectedAt || "",
-      duration: meta?.durationLabel || "",
-      emoji: "🙂",
-      suspicious: typeof meta?.score === "number" ? meta.score >= 70 : true,
-      score: typeof meta?.score === "number" ? meta.score : 0,
-    };
-  }, [id, meta]);
+  useEffect(() => { fetcher(); }, [fetcher]);
 
-  // API → VoiceAnalysisInfo props 매핑
-  const chatMessages = useMemo(() => {
+  const meta = location.state || {};
+  const record = useMemo(() => ({
+    id: Number(id),
+    name: meta?.name || "통화 기록",
+    date: meta?.detectedAt || "",
+    duration: meta?.durationLabel || "",
+    emoji: "🙂",
+    suspicious: typeof meta?.score === "number" ? meta.score >= 70 : true,
+    score: typeof meta?.score === "number" ? meta.score : 0,
+  }), [id, meta]);
+
+  const messages = useMemo(() => {
     if (!data?.transcript) return [];
     return splitTranscriptToMessages(data.transcript);
   }, [data]);
 
-  const analysis = useMemo(() => {
-    if (!data) return { scamType: "-", features: "-" };
-    return {
-      scamType: data.type || "-",
-      // 백엔드가 'features'를 따로 주지 않으니 간단 요약 문구
-      features: "급박한 송금/기관 사칭 등 위험 신호 탐지",
-    };
-  }, [data]);
+  const analysis = useMemo(() => ({
+    scamType: data?.type || "-",
+    features: data?.features || "급박한 송금/기관 사칭 등 위험 신호 탐지",
+  }), [data]);
 
-  const tips = useMemo(() => {
-    if (!data?.guidance) return [];
-    return [data.guidance];
-  }, [data]);
+  const tips = useMemo(() => (
+    data?.guidance ? [data.guidance] : ["경찰 또는 기관에 직접 확인하세요.", "돈을 요구하는 전화는 100% 보이스피싱입니다"]
+  ), [data]);
 
   return (
-    <div className="VoiceInfo_wrap VoiceRecord_wrap container" style={{ padding: 16 }}>
-      <div className="header">
-        <button className="back" onClick={() => navigate(-1)}>←</button>
-        <h2 style={{ margin: 0 }}>상세 분석</h2>
-        <div className="filter" />
+    <div className="container2 VoiceInfo_wrap">
+      {/* 상단 바 */}
+      <div className="topbar">
+        <button className="icon-btn" aria-label="뒤로가기" onClick={() => navigate(-1)}>
+          <FiChevronLeft />
+        </button>
+        <h2>상세 분석보기</h2>
+        <button className="icon-btn" aria-label="메뉴">
+          <FiMoreHorizontal />
+        </button>
       </div>
 
-      {/* 상단 카드 */}
-      <div className="record-list" style={{ marginBottom: 12 }}>
-        {useAlertCard ? <VoiceAlertCard /> : <VoiceRecordCard record={record} />}
+      {/* 상단 카드: 의심 있으면 빨간 카드, 없으면 일반 카드 */}
+      <div className="detail-head">
+        {record.suspicious ? (
+          <VoiceAlertCard
+            name={record.name}
+            date={record.date}
+            duration={record.duration}
+            score={record.score}
+          />
+        ) : (
+          <VoiceRecordCard record={record} />
+        )}
       </div>
 
       {/* 본문 */}
-      {loading ? (
-        <div style={{ color: "#aaa" }}>불러오는 중...</div>
-      ) : err ? (
-        <div style={{ color: "#f66" }}>{err}</div>
-      ) : (
-        <VoiceAnalysisInfo messages={chatMessages} type={analysis} tips={tips} />
-      )}
+      <div ref={captureRef} className="capture-area">
+        {loading ? (
+          <div className="inline-info">불러오는 중...</div>
+        ) : err ? (
+          <div className="inline-error">{err}</div>
+        ) : (
+          <VoiceAnalysisInfo
+            captureRef={captureRef}
+            messages={messages}
+            type={analysis}
+            tips={tips}
+          />
+        )}
+      </div>
     </div>
   );
 }

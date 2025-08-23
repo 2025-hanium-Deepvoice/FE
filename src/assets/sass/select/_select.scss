@@ -1,46 +1,75 @@
+/* 공통: 모바일 화면 같은 라운드 컨테이너 */
+.Screen {
+  min-height: 100dvh;
+  padding: 16px 16px 28px;
+  background: linear-gradient(180deg, #141416 0%, #0f0f10 30%, #0e0e0f 100%);
+  color: #fff;
+
+  /* 모바일 프레임처럼 보이게 하고 싶다면 (옵션) */
+  max-width: 480px;
+  margin: 0 auto;
+  border-radius: 24px;
+}
+
+/* 선택 페이지 레이아웃 */
 .ProfileSelect_wrap {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 
   .header {
     display: flex;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0;
+
+    .back {
+      background: transparent;
+      border: 0;
+      color: #d6d6d6;
+      font-size: 20px;
+      cursor: pointer;
+    }
   }
 
   .title {
-    display: flex;
-    align-items: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text, #f5f5f5);
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #eaeaea;
+    letter-spacing: -.1px;
   }
 
   .card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    gap: 10px;
+    margin-top: 8px;
   }
 }
 
+/* 카드 스타일 (목업톤) */
 .profile-card {
-  margin-inline: -8px;
-  width: calc(150%);
-  align-self: center;
+  /* ❌ overflow 유발하던 부분 제거 */
+  /* margin-inline: -8px; */
+  /* width: calc(150%); */
+  width: 100%;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  padding: 14px 18px;
-  border: 0;
-  border-radius: var(--sds-size-radius-200, 16px);
-  background: var(--button-input-fields, #262626);
-  color: var(--text, #eaeaea);
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+
+  /* 다크 + 살짝 글래스 */
+  background: #1a1b1f;
+  /* 또는 살짝 그라데: 
+     background: linear-gradient(135deg, rgba(94,180,255,.10), rgba(255,154,200,.10)); */
+  color: #f0f0f0;
   cursor: pointer;
 
-  transition: transform 0.08s ease, background 0.15s ease, outline-color 0.15s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .08s ease, background .2s ease, border-color .2s ease;
 
   &:hover { transform: translateY(-1px); }
   &:active { transform: translateY(0); }
@@ -53,34 +82,33 @@
   }
 
   .avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: #a78bfa22;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #2a2b31;
     display: grid;
     place-items: center;
     overflow: hidden;
     flex: 0 0 auto;
 
     img { width: 100%; height: 100%; object-fit: cover; }
-    .emoji { font-size: 24px; }
+    .emoji { font-size: 22px; }
   }
 
   .meta {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 40px;
-    font-size: 16px;
+    font-size: 15px;
 
-    .relation { opacity: 0.92; }
-    .bar { opacity: 0.4; }
-    .name { opacity: 0.92; font-weight: 600; }
+    .relation { opacity: 0.95; }
+    .bar { opacity: 0.45; }
+    .name { opacity: 0.95; font-weight: 600; }
   }
 
   .chevron {
     font-size: 20px;
-    opacity: 0.6;
+    opacity: 0.55;
   }
 
   &:focus-visible {
@@ -88,5 +116,53 @@
     outline-offset: 2px;
   }
 
-  &.is-active { background: #2d2d2d; }
+  &.is-active {
+    background: linear-gradient(135deg, rgba(126,87,255,.18), rgba(255,85,170,.18));
+    border-color: rgba(255,255,255,.14);
+  }
+}
+
+/* 컨테이너 안에서 바텀시트가 잘리도록 */
+.container2.ProfileSelect_wrap {
+  /* 이미 container2에 position: relative 있음 */
+  overflow: hidden; /* ← 바텀시트/백드롭이 프레임 밖으로 안 튀게 */
+}
+
+/* 바텀시트: 뷰포트 기준(fixed) → 컨테이너 기준(absolute) */
+.ps-sheet {
+  position: absolute; /* fixed -> absolute */
+  inset: 0;
+  z-index: 60;        /* 컨테이너 안에서 최상단 */
+  display: grid;
+  align-items: end;
+}
+
+/* 백드롭도 프레임 안에서만 보이도록 */
+.ps-sheet__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(2px);
+  /* 컨테이너 라운드에 맞추고 싶으면 (container2가 라운드면) */
+  border-radius: inherit;
+}
+
+/* 패널은 기존 그대로 */
+.ps-sheet__panel {
+  position: relative; width: 100%;
+  border-top-left-radius: 16px; border-top-right-radius: 16px;
+  background: rgba(26,27,31,.92);
+  border: 1px solid rgba(255,255,255,.08);
+  padding: 14px 18px 22px; text-align: center;
+  animation: slideUp .16s ease-out;
+}
+.ps-sheet__pill {
+  width: 38px; height: 4px; border-radius: 999px;
+  margin: 6px auto 10px; background: rgba(255,255,255,.24);
+}
+.ps-sheet p { margin: 4px 0 2px; font-weight: 700; }
+.ps-sheet__hint { font-size: 12px; color: #cfcfcf; }
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: .6; }
+  to { transform: translateY(0); opacity: 1; }
 }
