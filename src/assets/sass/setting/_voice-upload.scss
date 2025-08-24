@@ -1,55 +1,141 @@
+::-webkit-scrollbar {
+  display: none; /* 크롬/사파리 */
+}
+html {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+/* 바깥 래퍼 */
+.voice-wrap {
+  background-color: #0f0f0f;
+  overflow-x: hidden;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* 실제 콘텐츠 컨테이너 */
 .voice-upload {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 5rem 16px 24px;
+  box-sizing: border-box;
   min-height: 100vh;
-  background-color: #161616;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 5rem;
+  color: #fff;
 
   h2 {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 800;
+    text-align: center;
   }
-
   .description {
-    font-size: 0.875rem;
+    text-align: center;
+    font-size: 0.9rem;
     color: #aaaaaa;
-    margin-top: 0.25rem;
+    margin-top: 4px;
     margin-bottom: 1.5rem;
   }
 
+  /* 카드 */
   .profile-box {
-    width: 90%;
+    position: relative;
+    width: 100%;
     max-width: 420px;
+    margin: 0 auto 20px;
     background-color: #3b3b3b;
-    padding: 1.25rem;
-    border-radius: 1rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    margin-bottom: 2rem; // 카드 간 간격
-    overflow: visible;   // ✅ 내부 요소 잘리지 않도록
+    padding: 16px;
+    border-radius: 20px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) inset;
+
+    /* 카드 삭제 버튼: 우상단 (레이어 최상단) */
+    .box-remove {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px; height: 28px;
+      border: none; border-radius: 50%;
+      background: #ff4d4f; color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      z-index: 30;            /* 클릭 우선순위 */
+      pointer-events: auto;
+      &:hover { filter: brightness(1.05); }
+      &:active { transform: translateY(1px); }
+    }
 
     .input-group {
-      margin-top: 0.75rem;
-      margin-bottom: 1rem;
+      margin-top: 12px;
+      margin-bottom: 14px;
 
       label {
         display: block;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
       }
 
       input {
         width: 100%;
-        padding: 0.6rem 0.875rem;
-        border-radius: 0.5rem;
+        padding: 10px 14px;
+        border-radius: 10px;
         border: none;
         font-size: 1rem;
-        color: #000;
+        color: #fff;
+        background: #2a2a2a;
+        &::placeholder { color: #b0b0b0; }
+      }
 
-        &::placeholder {
-          color: #b0b0b0;
+      /* 커스텀 파일 입력 */
+      .visually-hidden {
+        position: absolute !important;
+        height: 1px; width: 1px;
+        overflow: hidden;
+        clip: rect(1px, 1px, 1px, 1px);
+        white-space: nowrap;
+      }
+
+      .file-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .file-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px 16px;
+          border-radius: 10px;
+          background: #1f1f1f;
+          color: #fff;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1px solid #2a2a2a;
+          &:active { transform: translateY(1px); }
         }
+
+        .file-name {
+          flex: 1 1 auto;
+          color: #d0d0d0;
+          font-size: 0.9rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .file-clear {
+          width: 22px; height: 22px;
+          border-radius: 50%;
+          border: none;
+          background: #ff6666; color: #fff;
+          display: inline-flex; align-items: center; justify-content: center;
+          cursor: pointer; font-size: 12px;
+        }
+      }
+
+      .hint {
+        display: block;
+        margin-top: 8px;
+        color: #bdbdbd;
+        font-size: 12px;
       }
     }
 
@@ -64,80 +150,49 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 72px;
-        height: 72px;
+        width: 84px; height: 84px;
         border-radius: 50%;
         overflow: hidden;
         cursor: pointer;
         background: #5a5a5a;
+        z-index: 1; /* 라벨 레이어 */
 
-        input {
-          display: none;
-        }
+        input { display: none; }
 
         .placeholder {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          svg {
-            color: #fff;
-          }
+          width: 100%; height: 100%;
+          display: flex; align-items: center; justify-content: center;
+          svg { color: #fff; }
         }
+        .preview-image { width: 100%; height: 100%; object-fit: cover; }
 
-        .preview-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .edit-badge {
+        /* 프리뷰 우하단 X 버튼 */
+        .image-clear {
           position: absolute;
-          right: -2px;
-          bottom: -2px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 22px;
-          height: 22px;
-          border-radius: 9999px;
-          background: #9f7aea;
-          color: #fff;
-          border: 2px solid #3b3b3b;
+          right: -6px;
+          bottom: -6px;
+          width: 22px; height: 22px;
+          border: none; border-radius: 50%;
+          background: #ff6666; color: #fff;
+          display: inline-flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,.25);
+          z-index: 5;
         }
-      }
-
-      .image-clear {
-        position: absolute;
-        top: -6px;
-        right: -6px;
-        width: 22px;
-        height: 22px;
-        border-radius: 9999px;
-        border: none;
-        background: #ff6666;
-        color: #fff;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
       }
     }
 
     /* 녹음 영역 */
     .record-section {
-      margin-top: 1rem;
+      margin-top: 10px;
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 0.75rem;
-      align-items: center;
+      grid-template-columns: 1fr;
+      gap: 10px;
 
       .record-label {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 8px;
         font-size: 0.9rem;
         color: #eee;
       }
@@ -145,26 +200,21 @@
       .record-controls {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        width: 100%;
-        grid-column: 1 / -1; // 아래 줄로 내려서 오디오와 버튼이 겹치지 않게
+        gap: 10px;
         flex-wrap: wrap;
       }
 
       .record-btn {
-        padding: 0.55rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
+        padding: 9px 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: 10px;
         cursor: pointer;
         color: #ffffff;
-        background-color: #6f2c91; // 기본: 녹음 시작
-        flex: 0 0 auto;
+        background-color: #6f2c91;
       }
-      .record-btn.recorded {
-        background-color: #4caf50; // 녹음 완료 후: 재녹음하기
-      }
+      .record-btn.recorded { background-color: #4caf50; }
 
       .audio-preview {
         flex: 1 1 220px;
@@ -175,19 +225,56 @@
         border-radius: 8px;
       }
     }
+
+    /* 업로드 섹션 */
+    .upload-col {
+      margin-top: 12px;
+
+      .upload-btn {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-weight: 800;
+        background: #9f7aea;
+        color: #fff;
+
+        &:disabled { opacity: .6; cursor: not-allowed; }
+        &:active { transform: translateY(1px); }
+      }
+
+      .upload-badge.success {
+        margin-top: 8px;
+        background:#16a34a;
+        color:#fff;
+        padding:6px 10px;
+        border-radius:8px;
+        font-size:12px;
+        font-weight:700;
+        display: inline-block;
+      }
+
+      .error-text {
+        margin-top: 8px;
+        color:#ff7b7b;
+        font-size: 13px;
+      }
+    }
   }
 
   .add-button {
-    margin-top: 0.5rem;
+    margin: 6px auto 24px;
     background-color: #6f2c91;
     color: #ffffff;
-    width: 40px;
-    height: 40px;
+    width: 44px; height: 44px;
     border-radius: 50%;
-    font-size: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-size: 1.4rem;
+    display: flex; justify-content: center; align-items: center;
     border: none;
     box-shadow: 0 4px 10px rgba(161, 139, 255, 0.5);
     cursor: pointer;
@@ -195,17 +282,12 @@
 
   /* 팝업 */
   .popup-overlay {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100vh;
+    position: fixed; inset: 0;
+    width: 100%; height: 100vh;
     background-color: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     z-index: 999;
   }
-
   .popup {
     background-color: #fff;
     border-radius: 16px;
@@ -214,60 +296,15 @@
     width: calc(100% - 32px);
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+    .popup-mic { color: #9f7aea; margin-bottom: 1rem; }
+    .popup-title { font-size: 1rem; font-weight: 700; margin-bottom: .75rem; color: #111; }
+    .popup-script { font-size: .9rem; color: #555; line-height: 1.5; margin-bottom: 1.5rem; }
+    .popup-button {
+      background-color: #9f7aea; color: white; border: none;
+      padding: .65rem 1.5rem; font-size: 1rem; border-radius: 8px; cursor: pointer; font-weight: 700;
+    }
   }
-
-  .popup-mic {
-    color: #9f7aea;
-    margin-bottom: 1rem;
-  }
-
-  .popup-title {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: #111;
-  }
-
-  .popup-script {
-    font-size: 0.9rem;
-    color: #555;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-  }
-
-  .popup-button {
-    background-color: #9f7aea;
-    color: white;
-    border: none;
-    padding: 0.65rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-}
-
-/* 페이지 전체 가로 스크롤 방지 */
-html,
-body,
-#root {
-  overflow-x: hidden;
-}
-
-/* 바깥 래퍼 */
-.voice-wrap {
-  
-  background-color: #0f0f0f; /* 검은 배경 */
-  overflow-x: hidden;
-}
-
-/* 실제 콘텐츠 컨테이너 */
-.voice-upload {
-  width: min(100%, 720px);
-  margin: 0 auto;
-  padding-left: 16px;
-  padding-right: 16px;
-  box-sizing: border-box;
 }
 
 /* 카드 내부 요소 안전장치 */
@@ -277,44 +314,9 @@ body,
 }
 
 /* 오디오 플레이어 */
-.voice-upload .profile-box .audio-preview {
-  width: 100%;
-  display: block;
-}
-
-/* JSON 응답 박스 */
-.json-view {
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow: auto;
-  max-height: 260px;
-}
-
-/* 긴 링크 줄바꿈 */
-.file-link {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
+.voice-upload .profile-box .audio-preview { width: 100%; display: block; }
 
 /* 작은 화면 대응 */
 @media (max-width: 420px) {
-  .voice-upload {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
-
-html { 
-  overflow-y: scroll !important;   /* 항상 세로 스크롤바 표시 */
-}
-
-/* 지원 브라우저에서 여백을 안정적으로 예약 */
-html, body {
-  scrollbar-gutter: stable both-edges;
-}
-
-/* .voice-wrap는 스크롤 컨테이너가 아님 (overflow/height 지정 X) */
-.voice-wrap {
-  /* min-height는 유지, overflow-y는 지정하지 않음 */
-  scrollbar-gutter: stable both-edges; /* 있어도 무해 */
+  .voice-upload { padding-left: 12px; padding-right: 12px; }
 }

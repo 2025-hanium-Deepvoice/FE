@@ -61,7 +61,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       // 로그인 성공 → 홈으로 이동
-      navigate('/home', { replace: true });
+      navigate('/voice-upload', { replace: true });
     } catch (err) {
       setErrorMsg(err?.message || '로그인 중 오류가 발생했습니다.');
     } finally {
