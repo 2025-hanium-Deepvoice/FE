@@ -1,6 +1,7 @@
+// src/pages/Signup.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiChevronLeft } from 'react-icons/fi';
 
 const API_BASE = import.meta?.env?.VITE_API_BASE || 'https://deepvoice-be.shop';
 const SIGNUP_PATH = '/auth/register'; // ← 명세대로
@@ -22,7 +23,6 @@ const Signup = () => {
     id.trim().length >= 4 &&
     password.trim().length >= 6;
 
-  const handleBack = () => navigate('/login');
   const togglePassword = () => setShowPassword(v => !v);
 
   const handleSignup = async () => {
@@ -44,7 +44,6 @@ const Signup = () => {
       });
 
       if (res.status !== 201) {
-        // 서버가 {message}를 줄 수도, text를 줄 수도 있으니 안전 파싱
         let message = '';
         try {
           const errJson = await res.clone().json();
@@ -61,7 +60,7 @@ const Signup = () => {
       setServerResp(data);
       setShowPopup(true);
 
-      // (선택) 2초 후 자동 이동
+      // (선택) 자동 이동
       // setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err) {
       console.error(err);
@@ -78,13 +77,23 @@ const Signup = () => {
   const handleGoToLogin = () => navigate('/login');
 
   return (
-    <div className="Signup_wrap container" onKeyDown={onKeyDown}>
-      <button className="back-button" onClick={handleBack}>{'<'}</button>
+  <div className="Signup_wrap container" onKeyDown={onKeyDown}>
+    {/* 기존 topbar 전체를 아래로 교체 */}
+    <div className="topbar topbar--simple">
+      <button
+        type="button"
+        className="icon-btn"
+        aria-label="뒤로가기"
+        onClick={() => navigate(-1)} // 항상 로그인으로 가려면 () => navigate('/login')
+      >
+        <FiChevronLeft />
+      </button>
+    </div>
 
-      <div className="title">
-        <h2>안녕하세요 <span>👋</span></h2>
-        <p>기본적인 정보를 등록해주세요</p>
-      </div>
+    <div className="title">
+      <h2>안녕하세요 <span>👋</span></h2>
+      <p>기본적인 정보를 등록해주세요</p>
+    </div>
 
       <div className="input-group">
         <label htmlFor="name">이름</label>
@@ -159,7 +168,7 @@ const Signup = () => {
             <p>너의 목소리가 보여</p>
             <p>서비스 가입을 축하드립니다</p>
             {serverResp && (
-              <p style={{opacity:0.8, fontSize:12}}>
+              <p style={{ opacity: 0.8, fontSize: 12 }}>
                 가입 ID: <b>{serverResp.user_id}</b>
               </p>
             )}
